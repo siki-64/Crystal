@@ -1,0 +1,80 @@
+<Project>
+  <PropertyGroup>
+    <EnableDefaultShaderItems Condition="'$(EnableDefaultShaderItems)' == ''">true</EnableDefaultShaderItems>
+    <CrystalShaderModel Condition="'$(CrystalShaderModel)' == ''">6_6</CrystalShaderModel>
+    <CrystalShaderDebugInfo Condition="'$(CrystalShaderDebugInfo)' == '' and '$(Configuration)' == 'Debug'">true</CrystalShaderDebugInfo>
+    <CrystalShaderWarningsAsErrors Condition="'$(CrystalShaderWarningsAsErrors)' == ''">$(TreatWarningsAsErrors)</CrystalShaderWarningsAsErrors>
+    <CrystalEmbedShaders Condition="'$(CrystalEmbedShaders)' == ''">false</CrystalEmbedShaders>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EnableDefaultShaderItems)' == 'true'">
+    <Shader Include="**/*.hlsl" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <ShaderInclude Include="**/*.hlsli" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <None Remove="@(Shader);@(ShaderInclude)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../../Crystal.ShaderCompiler/Crystal.ShaderCompiler.csproj">
+      <ReferenceOutputAssembly>$(CrystalRuntimeShaderCompiler)</ReferenceOutputAssembly>
+      <ReferenceOutputAssembly Condition="'$(CrystalRuntimeShaderCompiler)' != 'true'">false</ReferenceOutputAssembly>
+      <Private>$(CrystalRuntimeShaderCompiler)</Private>
+      <Private Condition="'$(CrystalRuntimeShaderCompiler)' != 'true'">false</Private>
+      <Name>Crystal.ShaderCompiler</Name>
+      <IsCrystalShaderCompiler>true</IsCrystalShaderCompiler>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Target Name="ResolveCrystalShaders" Condition="'@(Shader)' != ''">
+    <PropertyGroup>
+      <CrystalShaderOutputPath Condition="'$(CrystalShaderOutputPath)' == ''">$(IntermediateOutputPath)shaders/</CrystalShaderOutputPath>
+      <CrystalShaderResponseFile>$(IntermediateOutputPath)Crystal.Shaders.rsp</CrystalShaderResponseFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <_CrystalShader Include="@(Shader)">
+        <OutputPath>$(CrystalShaderOutputPath)%(RelativeDir)%(Filename).crystalshader</OutputPath>
+        <TargetLink>%(RelativeDir)%(Filename).crystalshader</TargetLink>
+        <LogicalName>$([System.String]::Copy('%(RelativeDir)%(Filename)').Replace('\', '/')).crystalshader</LogicalName>
+      </_CrystalShader>
+      <_CrystalShaderCompilerProject Include="@(ProjectReference)" Condition="'%(ProjectReference.IsCrystalShaderCompiler)' == 'true'" />
+    </ItemGroup>
+    <MSBuild Projects="@(_CrystalShaderCompilerProject)" Targets="GetTargetPath" BuildInParallel="$(BuildInParallel)">
+      <Output TaskParameter="TargetOutputs" PropertyName="_CrystalShaderCompilerAssembly" />
+    </MSBuild>
+    <PropertyGroup>
+      <_CrystalShaderCompiler>$([System.IO.Path]::ChangeExtension('$(_CrystalShaderCompilerAssembly)', '.exe'))</_CrystalShaderCompiler>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="CompileCrystalShaders"
+          DependsOnTargets="ResolveProjectReferences;ResolveCrystalShaders"
+          BeforeTargets="AssignTargetPaths"
+          Condition="'@(Shader)' != ''"
+          Inputs="@(Shader);@(ShaderInclude);$(_CrystalShaderCompiler);$(MSBuildThisFileFullPath);$(MSBuildProjectFullPath)"
+          Outputs="@(_CrystalShader->'%(OutputPath)')">
+    <ItemGroup>
+      <_CrystalShaderArgument Include="--shader-model $(CrystalShaderModel)" />
+      <_CrystalShaderArgument Include="--debug-info" Condition="'$(CrystalShaderDebugInfo)' == 'true'" />
+      <_CrystalShaderArgument Include="--warnings-as-errors" Condition="'$(CrystalShaderWarningsAsErrors)' == 'true'" />
+      <_CrystalShaderArgument Include="@(CrystalShaderIncludeDirectory->'--include %(FullPath)')" />
+      <_CrystalShaderArgument Include="@(CrystalShaderDefine->'--define %(Identity)')" />
+      <_CrystalShaderArgument Include="@(_CrystalShader->'--compile %(FullPath)|%(OutputPath)')" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(CrystalShaderResponseFile)" Lines="@(_CrystalShaderArgument)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <Exec Command="&quot;$(_CrystalShaderCompiler)&quot; &quot;@$(CrystalShaderResponseFile)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="_CrystalShaderCompilerExitCode" />
+    </Exec>
+    <Error Condition="'$(_CrystalShaderCompilerExitCode)' != '0' and '$(_CrystalShaderCompilerExitCode)' != '1'" Text="Crystal.ShaderCompiler exited with code $(_CrystalShaderCompilerExitCode)." />
+    <ItemGroup>
+      <FileWrites Include="@(_CrystalShader->'%(OutputPath)')" />
+      <FileWrites Include="$(CrystalShaderResponseFile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyCrystalShaders" DependsOnTargets="ResolveCrystalShaders" AfterTargets="CompileCrystalShaders" BeforeTargets="AssignTargetPaths" Condition="'@(Shader)' != ''">
+    <ItemGroup>
+      <None Include="@(_CrystalShader->'%(OutputPath)')" Link="%(_CrystalShader.TargetLink)" CopyToOutputDirectory="PreserveNewest" Visible="false" Condition="'$(CrystalEmbedShaders)' != 'true' and Exists('%(_CrystalShader.OutputPath)')" />
+      <EmbeddedResource Include="@(_CrystalShader->'%(OutputPath)')" LogicalName="%(_CrystalShader.LogicalName)" Visible="false" Condition="'$(CrystalEmbedShaders)' == 'true' and Exists('%(_CrystalShader.OutputPath)')" />
+      <FileWrites Include="@(_CrystalShader->'%(OutputPath)')" />
+    </ItemGroup>
+  </Target>
+</Project>

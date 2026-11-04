@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Crystal.Framework/Crystal.Framework.csproj" />
+    <Project Path="src/Crystal.ImGui/Crystal.ImGui.csproj" />
+    <Project Path="src/Crystal.ShaderCompiler/Crystal.ShaderCompiler.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Crystal.Tests/Crystal.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Crystal.ImGui.Generator/Crystal.ImGui.Generator.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/HelloWorld/HelloWorld.csproj" />
+  </Folder>
+</Solution>

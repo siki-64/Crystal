@@ -1,0 +1,986 @@
+namespace Crystal.ImGui;
+
+[Flags]
+public enum ImDrawFlags : int
+{
+    None = 0,
+    RoundTopLeft = 16,
+    RoundTopRight = 32,
+    RoundBottomLeft = 64,
+    RoundBottomRight = 128,
+    RoundNone = 256,
+    RoundAll = 240,
+    RoundTop = 48,
+    RoundBottom = 192,
+    RoundLeft = 80,
+    RoundRight = 160,
+    Closed = 512,
+    JoinMiter = 1024,
+    CapSquare = 2048,
+    AAFill = 4096,
+    AALines = 8192,
+    AALineEnds = 16384,
+    StrokeInside = 131072,
+    StrokeCenter = 262144,
+    StrokeCenterBiased = 393216,
+    StrokeOutside = 524288,
+    StrokeLegacy = 917504,
+    TextNoPixelSnap = 1048576,
+    UseTexForRoundCorners = 2097152,
+    UseVtxOffset = 4194304,
+    AllowTexForRoundCorners = 8388608,
+    RoundMask = 496,
+    AllowInPushScope = 8286704,
+    AllowInFrameScope = 16675312,
+    StrokeMask = 917504,
+    InvalidMask = -2147483633,
+}
+
+[Flags]
+public enum ImFontAtlasFlags : int
+{
+    None = 0,
+    NoPowerOfTwoHeight = 1,
+    NoMouseCursors = 2,
+    NoBakedLines = 4,
+    NoBakedRoundCorners = 8,
+}
+
+[Flags]
+public enum ImFontFlags : int
+{
+    None = 0,
+    NoLoadError = 2,
+    NoLoadGlyphs = 4,
+    LockBakedSizes = 8,
+    ImplicitRefSize = 16,
+}
+
+[Flags]
+public enum ImGuiBackendFlags : int
+{
+    None = 0,
+    HasGamepad = 1,
+    HasMouseCursors = 2,
+    HasSetMousePos = 4,
+    RendererHasVtxOffset = 8,
+    RendererHasTextures = 16,
+    RendererHasViewports = 1024,
+    PlatformHasViewports = 2048,
+    HasMouseHoveredViewport = 4096,
+    HasParentViewport = 8192,
+}
+
+[Flags]
+public enum ImGuiButtonFlags : int
+{
+    None = 0,
+    MouseButtonLeft = 1,
+    MouseButtonRight = 2,
+    MouseButtonMiddle = 4,
+    MouseButtonMask = 7,
+    EnableNav = 8,
+    AllowOverlap = 4096,
+}
+
+[Flags]
+public enum ImGuiChildFlags : int
+{
+    None = 0,
+    Borders = 1,
+    AlwaysUseWindowPadding = 2,
+    ResizeX = 4,
+    ResizeY = 8,
+    AutoResizeX = 16,
+    AutoResizeY = 32,
+    AlwaysAutoResize = 64,
+    FrameStyle = 128,
+    NavFlattened = 256,
+}
+
+public enum ImGuiCol : int
+{
+    Text = 0,
+    TextDisabled = 1,
+    WindowBg = 2,
+    ChildBg = 3,
+    PopupBg = 4,
+    Border = 5,
+    BorderShadow = 6,
+    FrameBg = 7,
+    FrameBgHovered = 8,
+    FrameBgActive = 9,
+    TitleBg = 10,
+    TitleBgActive = 11,
+    TitleBgCollapsed = 12,
+    MenuBarBg = 13,
+    ScrollbarBg = 14,
+    ScrollbarGrab = 15,
+    ScrollbarGrabHovered = 16,
+    ScrollbarGrabActive = 17,
+    CheckMark = 18,
+    CheckboxSelectedBg = 19,
+    SliderGrab = 20,
+    SliderGrabActive = 21,
+    Button = 22,
+    ButtonHovered = 23,
+    ButtonActive = 24,
+    Header = 25,
+    HeaderHovered = 26,
+    HeaderActive = 27,
+    Separator = 28,
+    SeparatorHovered = 29,
+    SeparatorActive = 30,
+    ResizeGrip = 31,
+    ResizeGripHovered = 32,
+    ResizeGripActive = 33,
+    InputTextCursor = 34,
+    TabHovered = 35,
+    Tab = 36,
+    TabSelected = 37,
+    TabSelectedOverline = 38,
+    TabDimmed = 39,
+    TabDimmedSelected = 40,
+    TabDimmedSelectedOverline = 41,
+    DockingPreview = 42,
+    DockingEmptyBg = 43,
+    PlotLines = 44,
+    PlotLinesHovered = 45,
+    PlotHistogram = 46,
+    PlotHistogramHovered = 47,
+    TableHeaderBg = 48,
+    TableBorderStrong = 49,
+    TableBorderLight = 50,
+    TableRowBg = 51,
+    TableRowBgAlt = 52,
+    TextLink = 53,
+    TextSelectedBg = 54,
+    TreeLines = 55,
+    DragDropTarget = 56,
+    DragDropTargetBg = 57,
+    UnsavedMarker = 58,
+    NavCursor = 59,
+    NavWindowingHighlight = 60,
+    NavWindowingDimBg = 61,
+    ModalWindowDimBg = 62,
+    COUNT = 63,
+}
+
+[Flags]
+public enum ImGuiColorEditFlags : int
+{
+    None = 0,
+    NoAlpha = 2,
+    NoPicker = 4,
+    NoOptions = 8,
+    NoSmallPreview = 16,
+    NoInputs = 32,
+    NoTooltip = 64,
+    NoLabel = 128,
+    NoSidePreview = 256,
+    NoDragDrop = 512,
+    NoBorder = 1024,
+    NoColorMarkers = 2048,
+    AlphaOpaque = 4096,
+    AlphaNoBg = 8192,
+    AlphaPreviewHalf = 16384,
+    AlphaBar = 262144,
+    HDR = 524288,
+    DisplayRGB = 1048576,
+    DisplayHSV = 2097152,
+    DisplayHex = 4194304,
+    Uint8 = 8388608,
+    Float = 16777216,
+    PickerHueBar = 33554432,
+    PickerHueWheel = 67108864,
+    PickerNoRotate = 134217728,
+    InputRGB = 268435456,
+    InputHSV = 536870912,
+    DefaultOptions = 311427072,
+    AlphaMask = 28674,
+    DisplayMask = 7340032,
+    DataTypeMask = 25165824,
+    PickerMask = 100663296,
+    InputMask = 805306368,
+}
+
+[Flags]
+public enum ImGuiComboFlags : int
+{
+    None = 0,
+    PopupAlignLeft = 1,
+    HeightSmall = 2,
+    HeightRegular = 4,
+    HeightLarge = 8,
+    HeightLargest = 16,
+    NoArrowButton = 32,
+    NoPreview = 64,
+    WidthFitPreview = 128,
+    HeightMask = 30,
+}
+
+public enum ImGuiCond : int
+{
+    None = 0,
+    Always = 1,
+    Once = 2,
+    FirstUseEver = 4,
+    Appearing = 8,
+}
+
+[Flags]
+public enum ImGuiConfigFlags : int
+{
+    None = 0,
+    NavEnableKeyboard = 1,
+    NavEnableGamepad = 2,
+    NoMouse = 16,
+    NoMouseCursorChange = 32,
+    NoKeyboard = 64,
+    DockingEnable = 128,
+    ViewportsEnable = 1024,
+    IsSRGB = 1048576,
+    IsTouchScreen = 2097152,
+}
+
+public enum ImGuiDataType : int
+{
+    S8 = 0,
+    U8 = 1,
+    S16 = 2,
+    U16 = 3,
+    S32 = 4,
+    U32 = 5,
+    S64 = 6,
+    U64 = 7,
+    Float = 8,
+    Double = 9,
+    Bool = 10,
+    String = 11,
+    COUNT = 12,
+}
+
+public enum ImGuiDir : int
+{
+    None = -1,
+    Left = 0,
+    Right = 1,
+    Up = 2,
+    Down = 3,
+    COUNT = 4,
+}
+
+[Flags]
+public enum ImGuiDockNodeFlags : int
+{
+    None = 0,
+    KeepAliveOnly = 1,
+    NoDockingOverCentralNode = 4,
+    PassthruCentralNode = 8,
+    NoDockingSplit = 16,
+    NoResize = 32,
+    AutoHideTabBar = 64,
+    NoUndocking = 128,
+}
+
+[Flags]
+public enum ImGuiDragDropFlags : int
+{
+    None = 0,
+    SourceNoPreviewTooltip = 1,
+    SourceNoDisableHover = 2,
+    SourceNoHoldToOpenOthers = 4,
+    SourceAllowNullID = 8,
+    SourceExtern = 16,
+    PayloadAutoExpire = 32,
+    PayloadNoCrossContext = 64,
+    PayloadNoCrossProcess = 128,
+    AcceptBeforeDelivery = 1024,
+    AcceptNoDrawDefaultRect = 2048,
+    AcceptNoPreviewTooltip = 4096,
+    AcceptDrawAsHovered = 8192,
+    AcceptPeekOnly = 3072,
+}
+
+[Flags]
+public enum ImGuiFocusedFlags : int
+{
+    None = 0,
+    ChildWindows = 1,
+    RootWindow = 2,
+    AnyWindow = 4,
+    NoPopupHierarchy = 8,
+    DockHierarchy = 16,
+    RootAndChildWindows = 3,
+}
+
+[Flags]
+public enum ImGuiFreeTypeLoaderFlags : uint
+{
+    NoHinting = 1u,
+    NoAutoHint = 2u,
+    ForceAutoHint = 4u,
+    LightHinting = 8u,
+    MonoHinting = 16u,
+    Bold = 32u,
+    Oblique = 64u,
+    Monochrome = 128u,
+    LoadColor = 256u,
+    Bitmap = 512u,
+}
+
+[Flags]
+public enum ImGuiHoveredFlags : int
+{
+    None = 0,
+    ChildWindows = 1,
+    RootWindow = 2,
+    AnyWindow = 4,
+    NoPopupHierarchy = 8,
+    DockHierarchy = 16,
+    AllowWhenBlockedByPopup = 32,
+    AllowWhenBlockedByActiveItem = 128,
+    AllowWhenOverlappedByItem = 256,
+    AllowWhenOverlappedByWindow = 512,
+    AllowWhenDisabled = 1024,
+    NoNavOverride = 2048,
+    AllowWhenOverlapped = 768,
+    RectOnly = 928,
+    RootAndChildWindows = 3,
+    ForTooltip = 4096,
+    Stationary = 8192,
+    DelayNone = 16384,
+    DelayShort = 32768,
+    DelayNormal = 65536,
+    NoSharedDelay = 131072,
+}
+
+[Flags]
+public enum ImGuiInputFlags : int
+{
+    None = 0,
+    Repeat = 1,
+    RouteActive = 1024,
+    RouteFocused = 2048,
+    RouteGlobal = 4096,
+    RouteAlways = 8192,
+    RouteOverFocused = 16384,
+    RouteOverActive = 32768,
+    RouteUnlessBgFocused = 65536,
+    RouteFromRootWindow = 131072,
+    Tooltip = 262144,
+}
+
+[Flags]
+public enum ImGuiInputTextFlags : int
+{
+    None = 0,
+    CharsDecimal = 1,
+    CharsHexadecimal = 2,
+    CharsScientific = 4,
+    CharsUppercase = 8,
+    CharsNoBlank = 16,
+    AllowTabInput = 32,
+    EnterReturnsTrue = 64,
+    EscapeClearsAll = 128,
+    CtrlEnterForNewLine = 256,
+    ReadOnly = 512,
+    Password = 1024,
+    AlwaysOverwrite = 2048,
+    AutoSelectAll = 4096,
+    ParseEmptyRefVal = 8192,
+    DisplayEmptyRefVal = 16384,
+    NoHorizontalScroll = 32768,
+    NoUndoRedo = 65536,
+    ElideLeft = 131072,
+    CallbackCompletion = 262144,
+    CallbackHistory = 524288,
+    CallbackAlways = 1048576,
+    CallbackCharFilter = 2097152,
+    CallbackResize = 4194304,
+    CallbackEdit = 8388608,
+    WordWrap = 16777216,
+}
+
+[Flags]
+public enum ImGuiItemFlags : int
+{
+    None = 0,
+    NoTabStop = 1,
+    NoNav = 2,
+    NoNavDefaultFocus = 4,
+    ButtonRepeat = 8,
+    AutoClosePopups = 16,
+    AllowDuplicateId = 32,
+    Disabled = 64,
+    LiveEditOnInputText = 128,
+    LiveEditOnInputScalar = 256,
+    LiveEditOnInput = 384,
+    MixedValue = 512,
+}
+
+public enum ImGuiKey : int
+{
+    None = 0,
+    NamedKey_BEGIN = 512,
+    Tab = 512,
+    LeftArrow = 513,
+    RightArrow = 514,
+    UpArrow = 515,
+    DownArrow = 516,
+    PageUp = 517,
+    PageDown = 518,
+    Home = 519,
+    End = 520,
+    Insert = 521,
+    Delete = 522,
+    Backspace = 523,
+    Space = 524,
+    Enter = 525,
+    Escape = 526,
+    LeftCtrl = 527,
+    LeftShift = 528,
+    LeftAlt = 529,
+    LeftSuper = 530,
+    RightCtrl = 531,
+    RightShift = 532,
+    RightAlt = 533,
+    RightSuper = 534,
+    Menu = 535,
+    D0 = 536,
+    D1 = 537,
+    D2 = 538,
+    D3 = 539,
+    D4 = 540,
+    D5 = 541,
+    D6 = 542,
+    D7 = 543,
+    D8 = 544,
+    D9 = 545,
+    A = 546,
+    B = 547,
+    C = 548,
+    D = 549,
+    E = 550,
+    F = 551,
+    G = 552,
+    H = 553,
+    I = 554,
+    J = 555,
+    K = 556,
+    L = 557,
+    M = 558,
+    N = 559,
+    O = 560,
+    P = 561,
+    Q = 562,
+    R = 563,
+    S = 564,
+    T = 565,
+    U = 566,
+    V = 567,
+    W = 568,
+    X = 569,
+    Y = 570,
+    Z = 571,
+    F1 = 572,
+    F2 = 573,
+    F3 = 574,
+    F4 = 575,
+    F5 = 576,
+    F6 = 577,
+    F7 = 578,
+    F8 = 579,
+    F9 = 580,
+    F10 = 581,
+    F11 = 582,
+    F12 = 583,
+    F13 = 584,
+    F14 = 585,
+    F15 = 586,
+    F16 = 587,
+    F17 = 588,
+    F18 = 589,
+    F19 = 590,
+    F20 = 591,
+    F21 = 592,
+    F22 = 593,
+    F23 = 594,
+    F24 = 595,
+    Apostrophe = 596,
+    Comma = 597,
+    Minus = 598,
+    Period = 599,
+    Slash = 600,
+    Semicolon = 601,
+    Equal = 602,
+    LeftBracket = 603,
+    Backslash = 604,
+    RightBracket = 605,
+    GraveAccent = 606,
+    CapsLock = 607,
+    ScrollLock = 608,
+    NumLock = 609,
+    PrintScreen = 610,
+    Pause = 611,
+    Keypad0 = 612,
+    Keypad1 = 613,
+    Keypad2 = 614,
+    Keypad3 = 615,
+    Keypad4 = 616,
+    Keypad5 = 617,
+    Keypad6 = 618,
+    Keypad7 = 619,
+    Keypad8 = 620,
+    Keypad9 = 621,
+    KeypadDecimal = 622,
+    KeypadDivide = 623,
+    KeypadMultiply = 624,
+    KeypadSubtract = 625,
+    KeypadAdd = 626,
+    KeypadEnter = 627,
+    KeypadEqual = 628,
+    AppBack = 629,
+    AppForward = 630,
+    Oem102 = 631,
+    GamepadStart = 632,
+    GamepadBack = 633,
+    GamepadFaceLeft = 634,
+    GamepadFaceRight = 635,
+    GamepadFaceUp = 636,
+    GamepadFaceDown = 637,
+    GamepadDpadLeft = 638,
+    GamepadDpadRight = 639,
+    GamepadDpadUp = 640,
+    GamepadDpadDown = 641,
+    GamepadL1 = 642,
+    GamepadR1 = 643,
+    GamepadL2 = 644,
+    GamepadR2 = 645,
+    GamepadL3 = 646,
+    GamepadR3 = 647,
+    GamepadLStickLeft = 648,
+    GamepadLStickRight = 649,
+    GamepadLStickUp = 650,
+    GamepadLStickDown = 651,
+    GamepadRStickLeft = 652,
+    GamepadRStickRight = 653,
+    GamepadRStickUp = 654,
+    GamepadRStickDown = 655,
+    MouseLeft = 656,
+    MouseRight = 657,
+    MouseMiddle = 658,
+    MouseX1 = 659,
+    MouseX2 = 660,
+    MouseWheelX = 661,
+    MouseWheelY = 662,
+    ReservedForModCtrl = 663,
+    ReservedForModShift = 664,
+    ReservedForModAlt = 665,
+    ReservedForModSuper = 666,
+    NamedKey_END = 667,
+    NamedKey_COUNT = 155,
+    ModNone = 0,
+    ModCtrl = 4096,
+    ModShift = 8192,
+    ModAlt = 16384,
+    ModSuper = 32768,
+    ModMask = 61440,
+}
+
+[Flags]
+public enum ImGuiListClipperFlags : int
+{
+    None = 0,
+    NoSetTableRowCounters = 1,
+}
+
+public enum ImGuiMouseButton : int
+{
+    Left = 0,
+    Right = 1,
+    Middle = 2,
+    COUNT = 5,
+}
+
+public enum ImGuiMouseCursor : int
+{
+    None = -1,
+    Arrow = 0,
+    TextInput = 1,
+    ResizeAll = 2,
+    ResizeNS = 3,
+    ResizeEW = 4,
+    ResizeNESW = 5,
+    ResizeNWSE = 6,
+    Hand = 7,
+    Wait = 8,
+    Progress = 9,
+    NotAllowed = 10,
+    COUNT = 11,
+}
+
+public enum ImGuiMouseSource : int
+{
+    Mouse = 0,
+    TouchScreen = 1,
+    Pen = 2,
+    COUNT = 3,
+}
+
+[Flags]
+public enum ImGuiMultiSelectFlags : int
+{
+    None = 0,
+    SingleSelect = 1,
+    NoSelectAll = 2,
+    NoRangeSelect = 4,
+    NoAutoSelect = 8,
+    NoAutoClear = 16,
+    NoAutoClearOnReselect = 32,
+    BoxSelect1d = 64,
+    BoxSelect2d = 128,
+    BoxSelectNoScroll = 256,
+    ClearOnEscape = 512,
+    ClearOnClickVoid = 1024,
+    ScopeWindow = 2048,
+    ScopeRect = 4096,
+    SelectOnAuto = 8192,
+    SelectOnClickAlways = 16384,
+    SelectOnClickRelease = 32768,
+    NavWrapX = 65536,
+    NoSelectOnRightClick = 131072,
+    SelectOnMask = 57344,
+    CheckboxMode = 1048576,
+}
+
+[Flags]
+public enum ImGuiPopupFlags : int
+{
+    None = 0,
+    MouseButtonLeft = 4,
+    MouseButtonRight = 8,
+    MouseButtonMiddle = 12,
+    NoReopen = 32,
+    NoOpenOverExistingPopup = 128,
+    NoOpenOverItems = 256,
+    AnyPopupId = 1024,
+    AnyPopupLevel = 2048,
+    AnyPopup = 3072,
+    MouseButtonShift = 2,
+    MouseButtonMask = 12,
+    InvalidMask = 3,
+}
+
+[Flags]
+public enum ImGuiSelectableFlags : int
+{
+    None = 0,
+    NoAutoClosePopups = 1,
+    SpanAllColumns = 2,
+    AllowDoubleClick = 4,
+    Disabled = 8,
+    AllowOverlap = 16,
+    Highlight = 32,
+    SelectOnNav = 64,
+}
+
+public enum ImGuiSelectionRequestType : int
+{
+    None = 0,
+    SetAll = 1,
+    SetRange = 2,
+}
+
+[Flags]
+public enum ImGuiSliderFlags : int
+{
+    None = 0,
+    Logarithmic = 32,
+    NoRoundToFormat = 64,
+    NoInput = 128,
+    WrapAround = 256,
+    ClampOnInput = 512,
+    ClampZeroRange = 1024,
+    NoSpeedTweaks = 2048,
+    ColorMarkers = 4096,
+    AlwaysClamp = 1536,
+    InvalidMask = 1879048207,
+}
+
+public enum ImGuiSortDirection : byte
+{
+    None = 0,
+    Ascending = 1,
+    Descending = 2,
+}
+
+public enum ImGuiStyleVar : int
+{
+    Alpha = 0,
+    DisabledAlpha = 1,
+    WindowPadding = 2,
+    WindowRounding = 3,
+    WindowBorderSize = 4,
+    WindowMinSize = 5,
+    WindowTitleAlign = 6,
+    ChildRounding = 7,
+    ChildBorderSize = 8,
+    PopupRounding = 9,
+    PopupBorderSize = 10,
+    FramePadding = 11,
+    FrameRounding = 12,
+    FrameBorderSize = 13,
+    ItemSpacing = 14,
+    ItemInnerSpacing = 15,
+    IndentSpacing = 16,
+    CellPadding = 17,
+    ScrollbarSize = 18,
+    ScrollbarRounding = 19,
+    ScrollbarPadding = 20,
+    GrabMinSize = 21,
+    GrabRounding = 22,
+    ImageRounding = 23,
+    ImageBorderSize = 24,
+    TabRounding = 25,
+    TabBorderSize = 26,
+    TabMinWidthBase = 27,
+    TabMinWidthShrink = 28,
+    TabBarBorderSize = 29,
+    TabBarOverlineSize = 30,
+    TableAngledHeadersAngle = 31,
+    TableAngledHeadersTextAlign = 32,
+    TreeLinesSize = 33,
+    TreeLinesRounding = 34,
+    MenuItemRounding = 35,
+    SelectableRounding = 36,
+    DragDropTargetRounding = 37,
+    ButtonTextAlign = 38,
+    SelectableTextAlign = 39,
+    SeparatorSize = 40,
+    SeparatorTextBorderSize = 41,
+    SeparatorTextAlign = 42,
+    SeparatorTextPadding = 43,
+    DockingSeparatorSize = 44,
+    COUNT = 45,
+}
+
+[Flags]
+public enum ImGuiTabBarFlags : int
+{
+    None = 0,
+    Reorderable = 1,
+    AutoSelectNewTabs = 2,
+    TabListPopupButton = 4,
+    NoCloseWithMiddleMouseButton = 8,
+    NoTabListScrollingButtons = 16,
+    NoTooltip = 32,
+    DrawSelectedOverline = 64,
+    FittingPolicyMixed = 128,
+    FittingPolicyShrink = 256,
+    FittingPolicyScroll = 512,
+    FittingPolicyMask = 896,
+    FittingPolicyDefault = 128,
+}
+
+[Flags]
+public enum ImGuiTabItemFlags : int
+{
+    None = 0,
+    UnsavedDocument = 1,
+    SetSelected = 2,
+    NoCloseWithMiddleMouseButton = 4,
+    NoPushId = 8,
+    NoTooltip = 16,
+    NoReorder = 32,
+    Leading = 64,
+    Trailing = 128,
+    NoAssumedClosure = 256,
+}
+
+public enum ImGuiTableBgTarget : int
+{
+    None = 0,
+    RowBg0 = 1,
+    RowBg1 = 2,
+    CellBg = 3,
+}
+
+[Flags]
+public enum ImGuiTableColumnFlags : int
+{
+    None = 0,
+    Disabled = 1,
+    DefaultHide = 2,
+    DefaultSort = 4,
+    WidthStretch = 8,
+    WidthFixed = 16,
+    NoResize = 32,
+    NoReorder = 64,
+    NoHide = 128,
+    NoClip = 256,
+    NoSort = 512,
+    NoSortAscending = 1024,
+    NoSortDescending = 2048,
+    NoHeaderLabel = 4096,
+    NoHeaderWidth = 8192,
+    PreferSortAscending = 16384,
+    PreferSortDescending = 32768,
+    IndentEnable = 65536,
+    IndentDisable = 131072,
+    AngledHeader = 262144,
+    IsEnabled = 16777216,
+    IsVisible = 33554432,
+    IsSorted = 67108864,
+    IsHovered = 134217728,
+    WidthMask = 24,
+    IndentMask = 196608,
+    StatusMask = 251658240,
+    NoDirectResize = 1073741824,
+}
+
+[Flags]
+public enum ImGuiTableFlags : int
+{
+    None = 0,
+    Resizable = 1,
+    Reorderable = 2,
+    Hideable = 4,
+    Sortable = 8,
+    NoSavedSettings = 16,
+    ContextMenuInBody = 32,
+    RowBg = 64,
+    BordersInnerH = 128,
+    BordersOuterH = 256,
+    BordersInnerV = 512,
+    BordersOuterV = 1024,
+    BordersH = 384,
+    BordersV = 1536,
+    BordersInner = 640,
+    BordersOuter = 1280,
+    Borders = 1920,
+    NoBordersInBody = 2048,
+    NoBordersInBodyUntilResize = 4096,
+    SizingFixedFit = 8192,
+    SizingFixedSame = 16384,
+    SizingStretchProp = 24576,
+    SizingStretchSame = 32768,
+    NoHostExtendX = 65536,
+    NoHostExtendY = 131072,
+    NoKeepColumnsVisible = 262144,
+    PreciseWidths = 524288,
+    NoClip = 1048576,
+    PadOuterX = 2097152,
+    NoPadOuterX = 4194304,
+    NoPadInnerX = 8388608,
+    ScrollX = 16777216,
+    ScrollY = 33554432,
+    SortMulti = 67108864,
+    SortTristate = 134217728,
+    HighlightHoveredColumn = 268435456,
+    SizingMask = 57344,
+}
+
+[Flags]
+public enum ImGuiTableRowFlags : int
+{
+    None = 0,
+    Headers = 1,
+}
+
+[Flags]
+public enum ImGuiTreeNodeFlags : int
+{
+    None = 0,
+    Selected = 1,
+    Framed = 2,
+    AllowOverlap = 4,
+    NoTreePushOnOpen = 8,
+    NoAutoOpenOnLog = 16,
+    DefaultOpen = 32,
+    OpenOnDoubleClick = 64,
+    OpenOnArrow = 128,
+    Leaf = 256,
+    Bullet = 512,
+    FramePadding = 1024,
+    SpanAvailWidth = 2048,
+    SpanFullWidth = 4096,
+    SpanLabelWidth = 8192,
+    SpanAllColumns = 16384,
+    LabelSpanAllColumns = 32768,
+    NavLeftJumpsToParent = 131072,
+    CollapsingHeader = 26,
+    DrawLinesNone = 262144,
+    DrawLinesFull = 524288,
+    DrawLinesToNodes = 1048576,
+}
+
+[Flags]
+public enum ImGuiViewportFlags : int
+{
+    None = 0,
+    IsPlatformWindow = 1,
+    IsPlatformMonitor = 2,
+    OwnedByApp = 4,
+    NoDecoration = 8,
+    NoTaskBarIcon = 16,
+    NoFocusOnAppearing = 32,
+    NoFocusOnClick = 64,
+    NoInputs = 128,
+    NoRendererClear = 256,
+    NoAutoMerge = 512,
+    TopMost = 1024,
+    CanHostOtherWindows = 2048,
+    IsMinimized = 4096,
+    IsFocused = 8192,
+}
+
+[Flags]
+public enum ImGuiWindowFlags : int
+{
+    None = 0,
+    NoTitleBar = 1,
+    NoResize = 2,
+    NoMove = 4,
+    NoScrollbar = 8,
+    NoScrollWithMouse = 16,
+    NoCollapse = 32,
+    AlwaysAutoResize = 64,
+    NoBackground = 128,
+    NoSavedSettings = 256,
+    NoMouseInputs = 512,
+    MenuBar = 1024,
+    HorizontalScrollbar = 2048,
+    NoFocusOnAppearing = 4096,
+    NoBringToFrontOnFocus = 8192,
+    AlwaysVerticalScrollbar = 16384,
+    AlwaysHorizontalScrollbar = 32768,
+    NoNavInputs = 65536,
+    NoNavFocus = 131072,
+    UnsavedDocument = 262144,
+    NoDocking = 524288,
+    NoNav = 196608,
+    NoDecoration = 43,
+    NoInputs = 197120,
+    DockNodeHost = 8388608,
+    ChildWindow = 16777216,
+    Tooltip = 33554432,
+    Popup = 67108864,
+    Modal = 134217728,
+    ChildMenu = 268435456,
+}
+
+public enum ImTextureFormat : int
+{
+    RGBA32 = 0,
+    Alpha8 = 1,
+}
+
+public enum ImTextureStatus : int
+{
+    OK = 0,
+    Destroyed = 1,
+    WantCreate = 2,
+    WantUpdates = 3,
+    WantDestroy = 4,
+}

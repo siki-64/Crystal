@@ -1,0 +1,66 @@
+<Project>
+  <PropertyGroup>
+    <ImGuiVersion>1.93.0-docking</ImGuiVersion>
+    <ImGuiArchiveSha256>302CCB19CF6FF803EBC970B4F96D59C95DD3A32169453AD5C503CAB67C057992</ImGuiArchiveSha256>
+    <ImGuiArchiveUrl>https://github.com/ocornut/imgui/archive/refs/tags/v$(ImGuiVersion).zip</ImGuiArchiveUrl>
+    <ImGuiCacheDirectory>$(ArtifactsPath)/natives/imgui-$(ImGuiVersion)/</ImGuiCacheDirectory>
+    <ImGuiArchivePath>$(ImGuiCacheDirectory)imgui-$(ImGuiVersion).zip</ImGuiArchivePath>
+    <ImGuiSourceDirectory>$(ImGuiCacheDirectory)imgui/</ImGuiSourceDirectory>
+    <ImGuiNativeDirectory>$(ArtifactsPath)/natives/crystal-imgui-native/</ImGuiNativeDirectory>
+    <ImGuiNativeLibraryPath>$(ImGuiNativeDirectory)Crystal.ImGui.Native.dll</ImGuiNativeLibraryPath>
+    <ImGuiNativeResponseFile>$(ImGuiNativeDirectory)Crystal.ImGui.Native.rsp</ImGuiNativeResponseFile>
+    <ImGuiVsWhere>$(MSBuildProgramFiles32)/Microsoft Visual Studio/Installer/vswhere.exe</ImGuiVsWhere>
+  </PropertyGroup>
+
+  <Target Name="FetchImGui" Condition="!Exists('$(ImGuiSourceDirectory)imgui.h')">
+    <DownloadFile SourceUrl="$(ImGuiArchiveUrl)" DestinationFolder="$(ImGuiCacheDirectory)" DestinationFileName="imgui-$(ImGuiVersion).zip" />
+    <GetFileHash Files="$(ImGuiArchivePath)" Algorithm="SHA256">
+      <Output TaskParameter="Hash" PropertyName="DownloadedImGuiArchiveSha256" />
+    </GetFileHash>
+    <Delete Files="$(ImGuiArchivePath)" Condition="'$(DownloadedImGuiArchiveSha256)' != '$(ImGuiArchiveSha256)'" />
+    <Error Condition="'$(DownloadedImGuiArchiveSha256)' != '$(ImGuiArchiveSha256)'" Text="Dear ImGui archive hash mismatch: expected $(ImGuiArchiveSha256), got $(DownloadedImGuiArchiveSha256)." />
+    <Unzip SourceFiles="$(ImGuiArchivePath)" DestinationFolder="$(ImGuiCacheDirectory)extracted/" Include="imgui-$(ImGuiVersion)/*.h;imgui-$(ImGuiVersion)/*.cpp;imgui-$(ImGuiVersion)/LICENSE.txt" />
+    <ItemGroup>
+      <_ExtractedImGuiFile Include="$(ImGuiCacheDirectory)extracted/imgui-$(ImGuiVersion)/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_ExtractedImGuiFile)" DestinationFolder="$(ImGuiSourceDirectory)" />
+    <RemoveDir Directories="$(ImGuiCacheDirectory)extracted/" />
+  </Target>
+
+  <Target Name="ResolveImGuiNativeSources" DependsOnTargets="FetchImGui">
+    <ItemGroup>
+      <_ImGuiNativeSource Include="$(ImGuiSourceDirectory)imgui.cpp;$(ImGuiSourceDirectory)imgui_demo.cpp;$(ImGuiSourceDirectory)imgui_draw.cpp;$(ImGuiSourceDirectory)imgui_tables.cpp;$(ImGuiSourceDirectory)imgui_widgets.cpp" />
+      <_ImGuiNativeSource Include="$(MSBuildProjectDirectory)/Native/*.cpp" />
+      <_ImGuiNativeHeader Include="$(ImGuiSourceDirectory)*.h;$(MSBuildProjectDirectory)/Native/*.h" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="BuildImGuiNative"
+          DependsOnTargets="ResolveImGuiNativeSources"
+          BeforeTargets="AssignTargetPaths"
+          Inputs="@(_ImGuiNativeSource);@(_ImGuiNativeHeader);$(MSBuildThisFileFullPath)"
+          Outputs="$(ImGuiNativeLibraryPath)">
+    <Error Condition="!Exists('$(ImGuiVsWhere)')" Text="vswhere.exe was not found. Install Visual Studio or the Build Tools with the C++ x64 tools to build Crystal.ImGui.Native.dll." />
+    <Exec Command="&quot;$(ImGuiVsWhere)&quot; -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath" ConsoleToMSBuild="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_ImGuiVisualStudioPath" />
+    </Exec>
+    <PropertyGroup>
+      <_ImGuiVcVars>$(_ImGuiVisualStudioPath)/VC/Auxiliary/Build/vcvars64.bat</_ImGuiVcVars>
+    </PropertyGroup>
+    <Error Condition="'$(_ImGuiVisualStudioPath)' == '' or !Exists('$(_ImGuiVcVars)')" Text="No Visual Studio installation with the C++ x64 tools was found. Install them to build Crystal.ImGui.Native.dll." />
+    <MakeDir Directories="$(ImGuiNativeDirectory)obj/" />
+    <ItemGroup>
+      <_ImGuiNativeArgument Include="/nologo;/LD;/MT;/O2;/std:c++17;/EHsc;/MP;/utf-8" />
+      <_ImGuiNativeArgument Include="/DIMGUI_DISABLE_OBSOLETE_FUNCTIONS;/DNDEBUG" />
+      <_ImGuiNativeArgument Include="&quot;/I$(ImGuiCacheDirectory)&quot;;&quot;/I$(ImGuiSourceDirectory)&quot;;&quot;/I$(MSBuildProjectDirectory)/Native&quot;" />
+      <_ImGuiNativeArgument Include="&quot;/Fo$(ImGuiNativeDirectory)obj/&quot;;&quot;/Fe$(ImGuiNativeLibraryPath)&quot;" />
+      <_ImGuiNativeArgument Include="@(_ImGuiNativeSource->'&quot;%(FullPath)&quot;')" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(ImGuiNativeResponseFile)" Lines="@(_ImGuiNativeArgument)" Overwrite="true" />
+    <Exec Command="call &quot;$(_ImGuiVcVars)&quot; &gt;nul &amp;&amp; cl.exe &quot;@$(ImGuiNativeResponseFile)&quot;" WorkingDirectory="$(ImGuiNativeDirectory)" />
+  </Target>
+
+  <ItemGroup>
+    <None Include="$(ImGuiNativeLibraryPath)" Link="Crystal.ImGui.Native.dll" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Crystal.Framework/Crystal.Framework.csproj" />
+    <ProjectReference Include="../../src/Crystal.ImGui/Crystal.ImGui.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CrystalRuntimeShaderCompiler>true</CrystalRuntimeShaderCompiler>
+  </PropertyGroup>
+
+  <Import Project="../../src/Crystal.Framework/build/Crystal.Shaders.targets" />
+</Project>

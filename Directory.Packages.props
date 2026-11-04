@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <AgilitySdkVersion>619</AgilitySdkVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="TerraFX.Interop.Windows" Version="10.0.26100.6" />
+    <PackageVersion Include="Microsoft.Direct3D.D3D12" Version="1.$(AgilitySdkVersion).6" />
+    <PackageVersion Include="Microsoft.Direct3D.DXC" Version="1.9.2609.5" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.1" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.5.1" />
+  </ItemGroup>
+</Project>

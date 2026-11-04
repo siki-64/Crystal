@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <SelfContained Condition="'$(PublishAot)' != 'true'">false</SelfContained>
+  </PropertyGroup>
+</Project>

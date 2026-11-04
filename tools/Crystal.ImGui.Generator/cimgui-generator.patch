@@ -1,0 +1,12 @@
+diff --git a/generator/cpp2ffi.lua b/generator/cpp2ffi.lua
+index 0e552d9..5992611 100644
+--- a/generator/cpp2ffi.lua
++++ b/generator/cpp2ffi.lua
+@@ -3523,6 +3523,7 @@ local function location(file,locpathT,defines,COMPILER,keepemptylines)
+                 end
+             end
+ 
++            line = line:gsub("__declspec%(non_user_code%)%s*","")
+             if line:sub(1,1) == "#" then
+ 			--elseif line:match"^%s*#" then
+                 -- Is this a location pragma?

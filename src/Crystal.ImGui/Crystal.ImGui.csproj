@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Crystal.ImGui</RootNamespace>
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <CrystalEmbedShaders>true</CrystalEmbedShaders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Crystal.Framework/Crystal.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Native/*.json" />
+  </ItemGroup>
+
+  <Import Project="../Crystal.Framework/build/Crystal.Shaders.targets" />
+  <Import Project="build/Crystal.ImGui.Native.targets" />
+</Project>

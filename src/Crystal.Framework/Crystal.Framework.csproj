@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Crystal</RootNamespace>
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+    <CrystalEmbedShaders>true</CrystalEmbedShaders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TerraFX.Interop.Windows" />
+    <PackageReference Include="Microsoft.Direct3D.D3D12" GeneratePathProperty="true" ExcludeAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Crystal.Tests" />
+  </ItemGroup>
+
+  <Import Project="build/Crystal.Natives.targets" />
+  <Import Project="build/Crystal.Shaders.targets" />
+</Project>

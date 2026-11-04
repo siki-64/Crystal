@@ -1,0 +1,34 @@
+<Project>
+  <PropertyGroup>
+    <SdlVersion>3.4.18</SdlVersion>
+    <SdlArchiveSha256>75C2C0FC74E7D1206AAEDC22893A35887332F4F85F5C8B74FDDC10D177985F2C</SdlArchiveSha256>
+    <SdlArchiveUrl>https://github.com/libsdl-org/SDL/releases/download/release-$(SdlVersion)/SDL3-$(SdlVersion)-win32-x64.zip</SdlArchiveUrl>
+    <SdlCacheDirectory>$(ArtifactsPath)/natives/sdl-$(SdlVersion)/</SdlCacheDirectory>
+    <SdlArchivePath>$(SdlCacheDirectory)SDL3-$(SdlVersion)-win32-x64.zip</SdlArchivePath>
+    <SdlLibraryPath>$(SdlCacheDirectory)SDL3.dll</SdlLibraryPath>
+    <AgilitySdkBinaries>$(PkgMicrosoft_Direct3D_D3D12)/build/native/bin/x64/</AgilitySdkBinaries>
+  </PropertyGroup>
+
+  <Target Name="FetchSdl" BeforeTargets="AssignTargetPaths" Condition="!Exists('$(SdlLibraryPath)')">
+    <DownloadFile SourceUrl="$(SdlArchiveUrl)" DestinationFolder="$(SdlCacheDirectory)" />
+    <GetFileHash Files="$(SdlArchivePath)" Algorithm="SHA256">
+      <Output TaskParameter="Hash" PropertyName="DownloadedSdlArchiveSha256" />
+    </GetFileHash>
+    <Delete Files="$(SdlArchivePath)" Condition="'$(DownloadedSdlArchiveSha256)' != '$(SdlArchiveSha256)'" />
+    <Error Condition="'$(DownloadedSdlArchiveSha256)' != '$(SdlArchiveSha256)'" Text="SDL3 archive hash mismatch: expected $(SdlArchiveSha256), got $(DownloadedSdlArchiveSha256)." />
+    <Unzip SourceFiles="$(SdlArchivePath)" DestinationFolder="$(SdlCacheDirectory)" Include="SDL3.dll;LICENSE.txt" />
+  </Target>
+
+  <ItemGroup>
+    <None Include="$(SdlLibraryPath)" Link="SDL3.dll" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    <None Include="$(AgilitySdkBinaries)D3D12Core.dll" Link="D3D12/D3D12Core.dll" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    <None Include="$(AgilitySdkBinaries)d3d12SDKLayers.dll" Link="D3D12/d3d12SDKLayers.dll" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Crystal.Graphics.D3D12.AgilitySdkVersionAttribute">
+      <_Parameter1>$(AgilitySdkVersion)</_Parameter1>
+      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

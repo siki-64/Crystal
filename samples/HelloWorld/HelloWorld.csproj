@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Crystal.Framework/Crystal.Framework.csproj" />
+  </ItemGroup>
+
+  <Import Project="../../src/Crystal.Framework/build/Crystal.Shaders.targets" />
+</Project>
