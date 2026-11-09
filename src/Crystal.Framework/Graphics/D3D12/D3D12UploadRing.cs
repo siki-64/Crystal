@@ -10,6 +10,8 @@ namespace Crystal.Graphics.D3D12;
 internal sealed unsafe class D3D12UploadRing(D3D12Device device) : IDisposable
 {
     public const int PageSize = 1 << 20;
+    public const int RetirementsPerTrim = 256;
+    public const int RetainedSparePageCount = 2;
 
     private readonly Queue<Page> _retiredPages = new();
     private readonly List<Page> _pagesInUse = [];
@@ -17,6 +19,8 @@ internal sealed unsafe class D3D12UploadRing(D3D12Device device) : IDisposable
     private readonly List<nint> _dedicatedInUse = [];
     private Page? _currentPage;
     private int _offset;
+    private int _retirementsSinceTrim;
+    private int _fewestSparePagesSinceTrim = int.MaxValue;
 
     public int PageCount => _allPages.Count;
 
@@ -47,6 +51,7 @@ internal sealed unsafe class D3D12UploadRing(D3D12Device device) : IDisposable
     {
         foreach (var dedicated in _dedicatedInUse) device.DeferredReleases.Release((IUnknown*)dedicated, new D3D12ReleaseValues(directValue, computeValue, 0));
         _dedicatedInUse.Clear();
+        TrimSparePages();
         foreach (var page in _pagesInUse)
         {
             page.DirectValue = directValue;
@@ -69,9 +74,32 @@ internal sealed unsafe class D3D12UploadRing(D3D12Device device) : IDisposable
         _currentPage = null;
     }
 
+    private void TrimSparePages()
+    {
+        var sparePages = 0;
+        foreach (var page in _retiredPages)
+        {
+            if (!IsComplete(page)) break;
+            sparePages++;
+        }
+        _fewestSparePagesSinceTrim = Math.Min(_fewestSparePagesSinceTrim, sparePages);
+        if (++_retirementsSinceTrim < RetirementsPerTrim) return;
+
+        for (var surplus = _fewestSparePagesSinceTrim - RetainedSparePageCount; surplus > 0; surplus--)
+        {
+            var page = _retiredPages.Dequeue();
+            _allPages.Remove(page);
+            page.Resource->Release();
+        }
+        _retirementsSinceTrim = 0;
+        _fewestSparePagesSinceTrim = int.MaxValue;
+    }
+
+    private bool IsComplete(Page page) => device.DirectQueue.IsComplete(page.DirectValue) && device.ComputeQueue.IsComplete(page.ComputeValue);
+
     private Page AcquirePage()
     {
-        if (_retiredPages.TryPeek(out var oldest) && device.DirectQueue.IsComplete(oldest.DirectValue) && device.ComputeQueue.IsComplete(oldest.ComputeValue)) return _retiredPages.Dequeue();
+        if (_retiredPages.TryPeek(out var oldest) && IsComplete(oldest)) return _retiredPages.Dequeue();
 
         var resource = CreateMappedBuffer(PageSize, "UploadRingPage", out var cpuAddress);
         var page = new Page(resource, cpuAddress, resource->GetGPUVirtualAddress());

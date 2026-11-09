@@ -500,6 +500,34 @@ public sealed class ShaderTests
     }, frameCount: 2);
 
     [TestMethod]
+    public void SpareUploadPagesAreReleasedAfterABurst()
+    {
+        var pagesAfterBurst = 0;
+        var pagesAtEnd = 0;
+        TestGame.RunFrames((device, frame) =>
+        {
+            using var library = LoadLibrary(device, "Basic");
+            using var target = CreateTarget(device, 8);
+            var program = library.GetProgram("SolidColor");
+            using var pipeline = new GraphicsPipeline(device, new GraphicsPipelineDescription { Program = program });
+            var tint = program.Parameters["Tint"]!;
+
+            device.SetRenderTarget(target);
+            device.SetPipeline(pipeline);
+            for (var draw = 0; draw < (frame == 0 ? 20000 : 1); draw++)
+            {
+                tint.SetValue(new Vector4(1f, 0f, 0f, 1f));
+                device.Draw(3);
+            }
+            if (frame == 0) pagesAfterBurst = device.UploadRingPageCount;
+            pagesAtEnd = device.UploadRingPageCount;
+        }, frameCount: 600);
+
+        Assert.IsGreaterThan(4, pagesAfterBurst);
+        Assert.IsLessThanOrEqualTo(4, pagesAtEnd);
+    }
+
+    [TestMethod]
     public void DrawsDoNotAllocate() => TestGame.RunOnce(device =>
     {
         using var library = LoadLibrary(device, "Resources");
