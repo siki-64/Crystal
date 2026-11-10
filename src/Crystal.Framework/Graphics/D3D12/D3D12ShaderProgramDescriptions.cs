@@ -13,7 +13,7 @@ internal static class D3D12ShaderProgramDescriptions
     {
         var shaders = new List<byte[]>();
         var programs = new D3D12ShaderProgramInfo[descriptions.Length];
-        var names = new HashSet<string>(StringComparer.Ordinal);
+        HashSet<string> names = [with(StringComparer.Ordinal)];
         for (var index = 0; index < descriptions.Length; index++)
         {
             var description = descriptions[index] ?? throw new ArgumentException($"Program description {index} is null.", nameof(descriptions));
@@ -42,7 +42,7 @@ internal static class D3D12ShaderProgramDescriptions
 
         var occupiedRegisters = new Dictionary<(char Class, int Space, int Register, ShaderStages Stage), string>();
         var constantBuffers = new D3D12ConstantBufferInfo[description.ConstantBuffers.Count];
-        var bufferNames = new HashSet<string>(StringComparer.Ordinal);
+        HashSet<string> bufferNames = [with(StringComparer.Ordinal)];
         for (var index = 0; index < constantBuffers.Length; index++)
         {
             var buffer = description.ConstantBuffers[index];
