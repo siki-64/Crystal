@@ -4,7 +4,7 @@ Crystal is an XNA-inspired C# game framework for Windows with a Direct3D 12 back
 
 ## Requirements
 - Windows 10 21H1 or later, x64
-- .NET 10 SDK
+- .NET 11 SDK
 - A GPU with Direct3D 12 feature level 12_0 and a driver that supports enhanced barriers, shader model 6.6 and resource binding tier 3, or WARP. Crystal uses enhanced barriers and descriptor indexing only and skips adapters without them.
 
 ## Getting started

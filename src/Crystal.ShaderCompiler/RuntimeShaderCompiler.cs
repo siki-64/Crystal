@@ -57,7 +57,7 @@ public sealed class RuntimeShaderCompiler : IDisposable
         var slots = new List<ShaderDescriptorSlot>();
         if (compiled != null)
         {
-            var problems = new List<string>(compiled.Reflection.Problems);
+            List<string> problems = [.. compiled.Reflection.Problems];
             var constantBufferRegisterLimit = stage == ShaderStage.Compute
                 ? ShaderLibraryBuilder.ComputeConstantBufferRegisterLimit
                 : ShaderLibraryBuilder.GraphicsConstantBufferRegisterLimit;
