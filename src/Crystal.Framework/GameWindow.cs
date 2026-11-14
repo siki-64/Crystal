@@ -108,6 +108,10 @@ public sealed unsafe class GameWindow : IDisposable
         }
     }
 
+    public void Minimize() => Windows.ShowWindow((HWND)Handle, SW.SW_MINIMIZE);
+
+    public void ToggleMaximized() => Windows.ShowWindow((HWND)Handle, Windows.IsZoomed((HWND)Handle) ? SW.SW_RESTORE : SW.SW_MAXIMIZE);
+
     public bool IsMinimized => IsHosted ? Windows.IsIconic((HWND)Handle) : (Sdl.GetWindowFlags(_window) & Sdl.WindowMinimized) != 0;
 
     public bool IsTextInputEnabled
