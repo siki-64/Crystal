@@ -12,10 +12,12 @@ internal sealed unsafe class PreciseSleeper : IDisposable
 
     private HANDLE _timer = CreateWaitableTimerExW(null, null, CreateWaitableTimerHighResolution, TIMER_ALL_ACCESS);
 
-    public void Sleep(TimeSpan duration)
+    public void Sleep(TimeSpan duration) =>
+        SleepUntil(Stopwatch.GetTimestamp() + (long)(duration.TotalSeconds * Stopwatch.Frequency));
+
+    public void SleepUntil(long deadline)
     {
-        var deadline = Stopwatch.GetTimestamp() + (long)(duration.TotalSeconds * Stopwatch.Frequency);
-        var coarse = duration - SpinThreshold;
+        var coarse = Stopwatch.GetElapsedTime(Stopwatch.GetTimestamp(), deadline) - SpinThreshold;
         if (coarse > TimeSpan.Zero)
         {
             if (_timer != HANDLE.NULL)

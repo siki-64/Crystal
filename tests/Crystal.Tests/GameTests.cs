@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Crystal.Graphics;
 
 namespace Crystal.Tests;
@@ -32,6 +33,31 @@ public sealed class GameTests
             var exception = Assert.ThrowsExactly<InvalidOperationException>(game.Run);
             StringAssert.Contains(exception.Message, "base.EndDraw");
         }
+    }
+
+    [TestMethod]
+    public void MaximumFrameRateSpacesFramesAtLeastOnePeriodApart()
+    {
+        const int frameRate = 50;
+        const int frameCount = 6;
+        var presented = new List<long>();
+        using var game = new PacedGame(frameCount, presented) { MaximumFrameRate = frameRate };
+        game.Run();
+
+        Assert.HasCount(frameCount, presented);
+        var period = TimeSpan.FromSeconds(1.0 / frameRate) - TimeSpan.FromMilliseconds(0.5);
+        for (var frame = 1; frame < frameCount; frame++)
+            Assert.IsGreaterThanOrEqualTo(period, Stopwatch.GetElapsedTime(presented[frame - 1], presented[frame]));
+    }
+
+    [TestMethod]
+    public void MaximumFrameRateComesFromTheOptionsAndRejectsNegativeValues()
+    {
+        using var game = new PacedGame(1, [], TestGame.WarpOptions(gpuBasedValidation: false) with { MaximumFrameRate = 30 });
+        Assert.AreEqual(30, game.MaximumFrameRate);
+        game.MaximumFrameRate = 0;
+        Assert.AreEqual(0, game.MaximumFrameRate);
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => game.MaximumFrameRate = -1);
     }
 
     [TestMethod]
@@ -101,6 +127,19 @@ public sealed class GameTests
         {
             _pipeline?.Dispose();
             _library?.Dispose();
+        }
+    }
+
+    private sealed class PacedGame(int frameCount, List<long> presented, GameOptions? options = null)
+        : Game(options ?? TestGame.WarpOptions(gpuBasedValidation: false))
+    {
+        protected override void Draw(GameTime gameTime) => GraphicsDevice.Clear(Color.Black);
+
+        protected override void EndDraw()
+        {
+            base.EndDraw();
+            presented.Add(Stopwatch.GetTimestamp());
+            if (presented.Count == frameCount) Exit();
         }
     }
 

@@ -24,6 +24,7 @@ sealed class MyGame() : Game(new GameOptions { Title = "My game", Width = 1280, 
 
 ## Game and window
 - **Frame hooks**: `BeginDraw` runs before `Draw` and `EndDraw` after it. Return `false` from `BeginDraw` to skip drawing for that tick. Overrides must call `base.BeginDraw` (which begins the frame) and `base.EndDraw` (which presents it), or the game loop throws.
+- **Frame limit**: `MaximumFrameRate` on `GameOptions` or `Game` caps the frames presented per second; `0`, the default, means no limit. `EndDraw` waits out the rest of the frame after presenting, so the cap also holds with `VSync` off and a variable time step.
 - **Window position**: `Window.Position` gets or sets the top-left corner of the window in desktop pixels. `Window.Display` is the display the window is on.
 - **Displays**: `Display.GetAll()` lists the connected displays with their `Name`, `Bounds`, `WorkArea` (the bounds without the taskbar), `IsPrimary` and `ContentScale`. It works before a `Game` exists.
 - **Text input**: set `Window.IsTextInputEnabled` to receive typed characters through the `Window.TextInput` event. Each event carries one UTF-16 `Character`, so characters outside the Basic Multilingual Plane arrive as two surrogate events. Turning text input on may show an on-screen keyboard or an input method window, so leave it off while the game only reads keys.

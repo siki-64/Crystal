@@ -17,6 +17,7 @@ Owns the window and the graphics device and runs the game loop. Derive from it, 
 | `bool IsMouseVisible { get; set; }` | Shows or hides the cursor over the window. `false` after construction. |
 | `TimeSpan TargetElapsedTime { get; set; }` | The length of one fixed update step. Throws `ArgumentOutOfRangeException` for zero or negative values. |
 | `bool IsFixedTimeStep { get; set; }` | `true` runs `Update` in steps of `TargetElapsedTime` and sleeps until the next step is due. `false` runs one `Update` and one `Draw` per tick with the real elapsed time. |
+| `int MaximumFrameRate { get; set; }` | The most frames presented per second, or `0` for no limit. Throws `ArgumentOutOfRangeException` for negative values. |
 | `void Run()` | Calls `Initialize` and `LoadContent`, shows the window unless `GameOptions.StartHidden`, then ticks until `Exit` or the window closes. Calls `UnloadContent` on the way out, also when a hook throws. Blocks the calling thread, which becomes the render thread. |
 | `void Exit()` | Ends the loop. The current tick skips its remaining updates and its draw. Closing the window calls it. |
 | `protected virtual void Initialize()` | Runs once before `LoadContent`. Empty by default. |
@@ -25,11 +26,13 @@ Owns the window and the graphics device and runs the game loop. Derive from it, 
 | `protected virtual void Update(GameTime gameTime)` | Runs once per update step. Empty by default. |
 | `protected virtual bool BeginDraw()` | Begins the frame and returns `true`. An override returns `false` to skip `Draw` and `EndDraw` for this tick, and must call `base.BeginDraw()` before returning `true`. |
 | `protected virtual void Draw(GameTime gameTime)` | Draws the frame. Empty by default. |
-| `protected virtual void EndDraw()` | Ends and presents the frame. An override must call `base.EndDraw()`. |
+| `protected virtual void EndDraw()` | Ends and presents the frame, then waits out the rest of the frame when `MaximumFrameRate` is set. An override must call `base.EndDraw()`. |
 | `void Dispose()` | Disposes the device and the window. |
 | `protected virtual void Dispose(bool disposing)` | Override to release your own resources; call the base method. |
 
 **Tick.** Each tick processes window events, sleeps until an update is due (fixed time step), runs the due `Update` steps, then `BeginDraw`, `Draw` and `EndDraw`. At most 500 ms of elapsed time is carried into one tick, so a long stall doesn't cause a burst of updates. While the window is minimized the tick skips drawing and sleeps 10 ms.
+
+**Frame limit.** With `MaximumFrameRate` set, `EndDraw` returns no sooner than one frame period after the previous `EndDraw` returned. The wait uses a high-resolution timer and spins for the last millisecond. It applies with and without vertical sync and with either time step, and the first frame never waits.
 
 **Throws** `InvalidOperationException` from `Run` when an override of `BeginDraw` returns `true` without calling `base.BeginDraw`, returns `false` after calling it, or when an override of `EndDraw` doesn't call `base.EndDraw`.
 
@@ -45,6 +48,7 @@ Owns the window and the graphics device and runs the game loop. Derive from it, 
 | `bool StartHidden { get; init; }` | `false` | Keeps the window hidden when `Run` starts. |
 | `bool IsFixedTimeStep { get; init; }` | `true` | Initial value of `Game.IsFixedTimeStep`. |
 | `TimeSpan TargetElapsedTime { get; init; }` | 1/60 s | Initial value of `Game.TargetElapsedTime`. |
+| `int MaximumFrameRate { get; init; }` | `0` | Initial value of `Game.MaximumFrameRate`. |
 | `GraphicsDeviceOptions Graphics { get; init; }` | `new()` | Options for the device; see [GraphicsDeviceOptions](graphics-device.md#graphicsdeviceoptions). |
 
 ## GameTime
