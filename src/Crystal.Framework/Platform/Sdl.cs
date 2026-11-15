@@ -8,6 +8,12 @@ internal static unsafe partial class Sdl
 
     public const uint InitVideo = 0x20;
     public const uint InitGamepad = 0x2000;
+    public const uint InitAudio = 0x10;
+
+    public const int AudioFormatFloat32 = 0x8120;
+    public const uint DefaultPlaybackAudioDevice = 0xFFFFFFFF;
+    public const string AudioDriverHint = "SDL_AUDIO_DRIVER";
+    public const string DummyAudioDriver = "dummy";
 
     public const ulong WindowHidden = 0x8;
     public const ulong WindowResizable = 0x20;
@@ -23,6 +29,27 @@ internal static unsafe partial class Sdl
 
     [LibraryImport(Library, EntryPoint = "SDL_Quit")]
     public static partial void Quit();
+
+    [LibraryImport(Library, EntryPoint = "SDL_InitSubSystem")]
+    [return: MarshalAs(UnmanagedType.U1)]
+    public static partial bool InitSubSystem(uint flags);
+
+    [LibraryImport(Library, EntryPoint = "SDL_QuitSubSystem")]
+    public static partial void QuitSubSystem(uint flags);
+
+    [LibraryImport(Library, EntryPoint = "SDL_OpenAudioDeviceStream")]
+    public static partial SdlAudioStream OpenAudioDeviceStream(uint deviceId, SdlAudioSpecification* specification, delegate* unmanaged[Cdecl]<void*, nint, int, int, void> callback, void* userData);
+
+    [LibraryImport(Library, EntryPoint = "SDL_ResumeAudioStreamDevice")]
+    [return: MarshalAs(UnmanagedType.U1)]
+    public static partial bool ResumeAudioStreamDevice(SdlAudioStream stream);
+
+    [LibraryImport(Library, EntryPoint = "SDL_PutAudioStreamData")]
+    [return: MarshalAs(UnmanagedType.U1)]
+    public static partial bool PutAudioStreamData(SdlAudioStream stream, void* buffer, int byteCount);
+
+    [LibraryImport(Library, EntryPoint = "SDL_DestroyAudioStream")]
+    public static partial void DestroyAudioStream(SdlAudioStream stream);
 
     [LibraryImport(Library, EntryPoint = "SDL_SetHint", StringMarshalling = StringMarshalling.Utf8)]
     [return: MarshalAs(UnmanagedType.U1)]
@@ -231,6 +258,20 @@ internal readonly struct SdlWindow(nint handle)
     {
         if (!IsNull) Sdl.DestroyWindow(this);
     }
+}
+
+internal readonly struct SdlAudioStream(nint handle)
+{
+    private readonly nint _handle = handle;
+
+    public bool IsNull => _handle == 0;
+}
+
+internal struct SdlAudioSpecification
+{
+    public int Format;
+    public int ChannelCount;
+    public int SampleRate;
 }
 
 internal readonly struct SdlGamepad(nint handle)
