@@ -27,6 +27,7 @@ sealed class MyGame() : Game(new GameOptions { Title = "My game", Width = 1280, 
 - **Frame limit**: `MaximumFrameRate` on `GameOptions` or `Game` caps the frames presented per second; `0`, the default, means no limit. `EndDraw` waits out the rest of the frame after presenting, so the cap also holds with `VSync` off and a variable time step.
 - **Window position**: `Window.Position` gets or sets the top-left corner of the window in desktop pixels. `Window.Display` is the display the window is on.
 - **Displays**: `Display.GetAll()` lists the connected displays with their `Name`, `Bounds`, `WorkArea` (the bounds without the taskbar), `IsPrimary` and `ContentScale`. It works before a `Game` exists.
+- **Clipboard**: `Window.ClipboardText` gets or sets the text on the system clipboard. It is an empty string when the clipboard holds no text. Line breaks are stored as `\r\n`.
 - **Text input**: set `Window.IsTextInputEnabled` to receive typed characters through the `Window.TextInput` event. Each event carries one UTF-16 `Character`, so characters outside the Basic Multilingual Plane arrive as two surrogate events. Turning text input on may show an on-screen keyboard or an input method window, so leave it off while the game only reads keys.
 
 ```csharp
