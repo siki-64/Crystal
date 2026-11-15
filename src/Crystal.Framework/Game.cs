@@ -12,6 +12,8 @@ public abstract unsafe class Game : IDisposable
     private readonly GameClock _clock;
     private readonly PreciseSleeper _sleeper = new();
     private long _lastTimestamp;
+    private long _framePresentedTimestamp;
+    private int _maximumFrameRate;
     private bool _exitRequested;
     private bool _isDisposed;
     private bool _isMouseVisible = true;
@@ -19,6 +21,7 @@ public abstract unsafe class Game : IDisposable
     protected Game(GameOptions? options = null)
     {
         Options = options ?? new GameOptions();
+        MaximumFrameRate = Options.MaximumFrameRate;
         _clock = new GameClock(Options.TargetElapsedTime, Options.IsFixedTimeStep);
 
         if (Options.HostWindowHandle != 0)
@@ -81,6 +84,16 @@ public abstract unsafe class Game : IDisposable
         set => _clock.IsFixedTimeStep = value;
     }
 
+    public int MaximumFrameRate
+    {
+        get => _maximumFrameRate;
+        set
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(value);
+            _maximumFrameRate = value;
+        }
+    }
+
     public void Run()
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
@@ -132,7 +145,13 @@ public abstract unsafe class Game : IDisposable
     {
     }
 
-    protected virtual void EndDraw() => GraphicsDevice.EndFrame();
+    protected virtual void EndDraw()
+    {
+        GraphicsDevice.EndFrame();
+        if (_maximumFrameRate > 0 && _framePresentedTimestamp != 0)
+            _sleeper.SleepUntil(_framePresentedTimestamp + Stopwatch.Frequency / _maximumFrameRate);
+        _framePresentedTimestamp = Stopwatch.GetTimestamp();
+    }
 
     private void Tick()
     {

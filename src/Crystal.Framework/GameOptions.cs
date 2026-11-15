@@ -12,5 +12,6 @@ public sealed record GameOptions
     public nint HostWindowHandle { get; init; }
     public bool IsFixedTimeStep { get; init; } = true;
     public TimeSpan TargetElapsedTime { get; init; } = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / 60);
+    public int MaximumFrameRate { get; init; }
     public GraphicsDeviceOptions Graphics { get; init; } = new();
 }
