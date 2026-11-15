@@ -14,7 +14,7 @@
 - File-scoped namespaces, LF line endings, warnings are errors.
 
 # Layout
-- Public API lives in `Crystal`, `Crystal.Graphics`, `Crystal.Input` and `Crystal.ImGui`. It never exposes D3D, DXGI or SDL types.
+- Public API lives in `Crystal`, `Crystal.Graphics`, `Crystal.Input`, `Crystal.Audio` and `Crystal.ImGui`. It never exposes D3D, DXGI or SDL types.
 - D3D12 code is `internal` under `Graphics/D3D12/`; SDL code is `internal` under `Platform/`.
 - SDL3 is bound by hand with `[LibraryImport]` in `Platform/Sdl.cs`. Check new constants and struct layouts against the SDL headers of the pinned version.
 - Flat global names use the `CRYSTAL_` prefix: environment variables, debug object names, log tags.
@@ -23,6 +23,10 @@
 - Run GPU changes with `CRYSTAL_DX12_DEBUG=1` and fix every debug layer error they report. Add `CRYSTAL_DX12_GBV=1` to also catch errors that only show while shaders run.
 - Every GPU test runs on WARP under the debug layer and fails on any debug layer error.
 - No managed allocations per draw call.
+
+# Audio
+- `AudioMixer` never touches SDL. Test mixing by calling `Render` and checking the samples; only `AudioDevice` tests open a device, and they use the silent driver.
+- No managed allocations in `Render` or in anything it calls.
 
 # Documentation
 - Add each new public feature to README.md.

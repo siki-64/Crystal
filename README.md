@@ -295,6 +295,30 @@ if (pad.IsConnected) Move(pad.ThumbSticks.Left);
 - **Edges and actions**: an `InputFrame` keeps this tick's and the previous tick's state. Call `Update` once per tick, then ask for `IsKeyPressed`, `IsMouseButtonReleased`, `MouseMovement` or `ScrollNotches`. An `InputMap<TAction>` binds your own action enum to keys, mouse buttons and gamepad buttons, and answers `IsDown`, `WasPressed` and `WasReleased` for the action as a whole.
 - **No allocations**: reading input state allocates no managed memory.
 
+## Audio
+```csharp
+using Crystal.Audio;
+
+_mixer = new AudioMixer();
+_audioDevice = new AudioDevice(_mixer);
+_jump = SoundEffect.FromWav("Sounds/Jump.wav");
+
+_mixer.Play(_jump, volume: 0.8f, pan: -0.3f);
+
+_engine = new SoundEffectInstance(_mixer, engineLoop) { IsLooped = true };
+_engine.Play();
+_engine.Pitch = speed / maximumSpeed;
+```
+
+- **`AudioMixer`**: a software mixer that renders stereo 32-bit float at 48 kHz by default. `Play` plays a sound once with a volume, pan and pitch. `MasterVolume` scales the whole mix, which is clamped to -1 to 1.
+- **`SoundEffect`**: decoded mono or stereo sound data, from float samples or from a WAVE file with `FromWav` (8 to 32-bit integer PCM and 32 or 64-bit float). It belongs to no mixer and can be loaded on any thread.
+- **`SoundEffectInstance`**: one playback you keep control of, with `Play`, `Pause`, `Stop`, `Volume`, `Pan` (-1 to 1), `Pitch` (octaves), `IsLooped` and `State`. Volume and pan changes ramp across one render, so they don't click.
+- **`AudioDevice`**: opens the default playback device and pulls the mixer on SDL's audio thread. Dispose it before the game exits. It throws `AudioException` when the machine has no playback device, so catch that to run without sound.
+- **Without a device**: a mixer needs no device. `Render` fills a span with the next frames, which is how the tests check mixing sample by sample.
+- **Resampling**: sounds at another rate than the mixer's, or played with a pitch, are resampled with linear interpolation.
+- **Threading**: every mixer and instance member is safe to call from any thread.
+- **No allocations**: once warmed up, playing and mixing allocate no managed memory.
+
 ## Dear ImGui
 `Crystal.ImGui` is a separate project with Dear ImGui 1.93.0 (docking branch) and a renderer for it. Reference it next to `Crystal.Framework`.
 
@@ -338,8 +362,9 @@ Crystal loads the Agility SDK through `ID3D12SDKConfiguration1::CreateDeviceFact
 | `CRYSTAL_DX12_DEBUG=1` | Turns on the D3D12 debug layer and DRED |
 | `CRYSTAL_DX12_GBV=1` | Also turns on GPU-based validation |
 | `CRYSTAL_DX12_WARP=1` | Uses the WARP software adapter |
+| `CRYSTAL_AUDIO_SILENT=1` | Makes `AudioDevice` discard its output instead of opening a playback device |
 
-These variables do the same as `GraphicsDeviceOptions.EnableDebugLayer`, `EnableGpuBasedValidation` and `AdapterPreference`. Debug layer messages go to `GraphicsDevice.DebugMessageReceived`, or to stderr if the event has no subscribers. Errors throw `GraphicsDebugException` at the end of the frame unless `ThrowOnDebugLayerErrors` is off.
+The first three do the same as `GraphicsDeviceOptions.EnableDebugLayer`, `EnableGpuBasedValidation` and `AdapterPreference`, and the last the same as the `isSilent` argument of `AudioDevice`. Debug layer messages go to `GraphicsDevice.DebugMessageReceived`, or to stderr if the event has no subscribers. Errors throw `GraphicsDebugException` at the end of the frame unless `ThrowOnDebugLayerErrors` is off.
 
 ## Building and testing
 ```
