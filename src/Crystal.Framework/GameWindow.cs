@@ -126,6 +126,21 @@ public sealed unsafe class GameWindow : IDisposable
         }
     }
 
+    public string ClipboardText
+    {
+        get
+        {
+            RequireOwned();
+            return Sdl.GetClipboardText();
+        }
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            RequireOwned();
+            if (!Sdl.SetClipboardText(value)) throw Sdl.Failure("SDL_SetClipboardText");
+        }
+    }
+
     public event EventHandler? ClientSizeChanged;
 
     public event EventHandler<TextInputEventArgs>? TextInput;

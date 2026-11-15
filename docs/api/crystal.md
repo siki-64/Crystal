@@ -77,6 +77,7 @@ Created by `Game`; there is no public constructor.
 | `bool IsMinimized { get; }` | `true` while minimized. |
 | `bool IsTextInputEnabled { get; set; }` | Turns on text input, which raises `TextInput`. May show an on-screen keyboard or an input method window; leave it off while only reading keys. |
 | `event EventHandler? ClientSizeChanged` | Raised after the client area changes size, during event processing at the start of a tick. The back buffer is resized at the next frame. |
+| `string ClipboardText { get; set; }` | The text on the system clipboard, or an empty string when it holds no text. Setting it replaces the clipboard's contents and stores each `\n` as `\r\n`, as Windows applications expect, so text read back has `\r\n` line breaks. Call it on the thread that runs the game. |
 | `event EventHandler<TextInputEventArgs>? TextInput` | Raised once per typed UTF-16 code unit while `IsTextInputEnabled` is on. Characters outside the Basic Multilingual Plane arrive as two surrogate events. |
 | `void Dispose()` | Destroys the window. `Game.Dispose` calls it. |
 

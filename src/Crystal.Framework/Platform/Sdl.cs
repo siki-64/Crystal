@@ -122,6 +122,26 @@ internal static unsafe partial class Sdl
     [LibraryImport(Library, EntryPoint = "SDL_free")]
     public static partial void Free(void* memory);
 
+    [LibraryImport(Library, EntryPoint = "SDL_SetClipboardText", StringMarshalling = StringMarshalling.Utf8)]
+    [return: MarshalAs(UnmanagedType.U1)]
+    public static partial bool SetClipboardText(string text);
+
+    [LibraryImport(Library, EntryPoint = "SDL_GetClipboardText")]
+    private static partial byte* GetClipboardTextUtf8();
+
+    public static string GetClipboardText()
+    {
+        var text = GetClipboardTextUtf8();
+        try
+        {
+            return Marshal.PtrToStringUTF8((nint)text) ?? string.Empty;
+        }
+        finally
+        {
+            Free(text);
+        }
+    }
+
     [LibraryImport(Library, EntryPoint = "SDL_PollEvent")]
     [return: MarshalAs(UnmanagedType.U1)]
     public static partial bool PollEvent(SdlEvent* sdlEvent);

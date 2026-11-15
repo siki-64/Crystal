@@ -61,6 +61,25 @@ public sealed class GameTests
     }
 
     [TestMethod]
+    public void ClipboardTextRoundTripsUnicode()
+    {
+        using var game = new TestGame((_, _) => { });
+        var previous = game.Window.ClipboardText;
+        try
+        {
+            const string text = "Crystal 東方 💎\nsecond line";
+            game.Window.ClipboardText = text;
+            Assert.AreEqual(text.Replace("\n", "\r\n"), game.Window.ClipboardText);
+            game.Window.ClipboardText = string.Empty;
+            Assert.AreEqual(string.Empty, game.Window.ClipboardText);
+        }
+        finally
+        {
+            game.Window.ClipboardText = previous;
+        }
+    }
+
+    [TestMethod]
     public void WindowPositionAndDisplays()
     {
         var displays = Display.GetAll();
