@@ -1,6 +1,6 @@
 # Crystal.Audio
 
-A software mixer, the sounds it plays, and the device that sends its output to the speakers. The mixer works without a device, so its output can be rendered into a buffer and checked.
+A software mixer, the sounds and music it plays, and the device that sends its output to the speakers. The mixer works without a device, so its output can be rendered into a buffer and checked.
 
 ## AudioMixer
 `public sealed class AudioMixer`
@@ -13,7 +13,7 @@ Mixes every playing sound into interleaved stereo 32-bit float frames. All membe
 | `const int DefaultSampleRate = 48000` | The default output rate in frames per second. |
 | `AudioMixer(int sampleRate = DefaultSampleRate)` | Throws `ArgumentOutOfRangeException` for zero or negative rates. |
 | `int SampleRate { get; }` | The output rate in frames per second. |
-| `int PlayingCount { get; }` | The number of sounds playing now, counting both `Play` calls and instances. |
+| `int PlayingCount { get; }` | The number of sounds playing now, counting `Play` calls, instances and music. |
 | `float MasterVolume { get; set; }` | Scales the whole mix. `1` by default. A change ramps across the next `Render`. Throws `ArgumentOutOfRangeException` for negative, infinite or NaN values. |
 | `void Play(SoundEffect sound, float volume = 1f, float pan = 0f, float pitch = 0f)` | Plays the sound once from the start, with no handle to it. The arguments follow the rules of `SoundEffectInstance.Volume`, `Pan` and `Pitch`. |
 | `void Render(Span<float> output)` | Overwrites `output` with the next frames of the mix, left sample first, clamped to -1 to 1. Advances every playing sound. Throws `ArgumentException` for an odd length. An `AudioDevice` calls it on the audio thread; call it yourself only on a mixer without a device. |
@@ -30,6 +30,7 @@ Decoded sound data held in memory. It is immutable, belongs to no mixer, and can
 | Member | Meaning |
 |---|---|
 | `SoundEffect(ReadOnlySpan<float> samples, int sampleRate, int channelCount)` | Copies interleaved float samples. `channelCount` is 1 or 2. Throws `ArgumentOutOfRangeException` for other channel counts and for zero or negative rates, and `ArgumentException` when the sample count isn't a multiple of the channel count. |
+| `static SoundEffect FromSource(AudioSource source)` | Decodes a source from its current position to its end into memory. The source stays open. Throws `ArgumentException` for a source that isn't mono or stereo. |
 | `static SoundEffect FromWav(Stream stream)` | Reads a RIFF WAVE file from the stream's current position to its end. |
 | `static SoundEffect FromWav(string path)` | Reads a RIFF WAVE file from disk. |
 | `int SampleRate { get; }` | Frames per second. |
@@ -58,6 +59,68 @@ One controllable playback of a `SoundEffect`. All members are safe to call from 
 | `void Stop()` | Stops and rewinds. |
 
 **Ramps.** Changes to `Volume` and `Pan` of a playing instance ramp across the next `Render`, so they don't click. `Pause` and `Stop` cut the sound off at once.
+
+## Music
+`public sealed class Music : IDisposable`
+
+Plays an `AudioSource` while decoding it, so a long track never sits in memory decoded. A background thread keeps about half a second decoded ahead of the mixer. All members are safe to call from any thread.
+
+| Member | Meaning |
+|---|---|
+| `Music(AudioMixer mixer, AudioSource source)` | Music in the `Stopped` state. It owns the source from here on and takes `LoopStart` and `LoopEnd` from it. Throws `ArgumentException` for a source that isn't mono or stereo or whose sample rate isn't positive. |
+| `float Volume { get; set; }` | Gain, `1` by default. A change ramps across the next `Render`. Throws `ArgumentOutOfRangeException` for negative, infinite or NaN values. |
+| `bool IsLooped { get; set; }` | `true` repeats the loop body instead of stopping. `false` by default, also for a source that has loop points. |
+| `long LoopStart { get; set; }` | The source frame a loop jumps back to. Throws `ArgumentOutOfRangeException` for negative values. |
+| `long? LoopEnd { get; set; }` | The source frame a loop jumps back from, which is not played itself. `null` is the end of the source. A value at or before `LoopStart` also loops at the end of the source. Throws `ArgumentOutOfRangeException` for zero and negative values. |
+| `SoundState State { get; }` | `Stopped`, `Playing` or `Paused`. Becomes `Stopped` when music that isn't looped reaches its end. |
+| `Exception? Error { get; }` | The exception the source threw while decoding, or `null`. Music that hits one plays what it has decoded and stops. |
+| `void Play()` | Starts from the beginning when stopped and resumes when paused. Does nothing while playing. |
+| `void Pause()` | Keeps the position. Does nothing unless playing. |
+| `void Stop()` | Stops and rewinds. |
+| `void Dispose()` | Stops, ends the decode thread and disposes the source. |
+
+**Loops.** With `IsLooped`, the music plays from the start to `LoopEnd` once and then repeats `LoopStart` to `LoopEnd`, so an intro before `LoopStart` plays a single time. The jump is gapless. Changes to `IsLooped` and the loop points apply to what is decoded from then on, up to half a second after the call.
+
+**Mixing.** Mono sources play on both channels. A source at another rate than the mixer's is resampled with linear interpolation. Music has no pan or pitch.
+
+**Underruns.** When decoding falls behind, the music is silent until data arrives and then continues where it was. `Play` returns before the first frames are decoded.
+
+## AudioSource
+`public abstract class AudioSource : IDisposable`
+
+A stream of decoded audio that is read forward and can be repositioned. Derive from it to play another format through `Music` or `SoundEffect.FromSource`. A source is used by one thread at a time; `Music` calls it on its decode thread.
+
+| Member | Meaning |
+|---|---|
+| `abstract int SampleRate { get; }` | Frames per second. |
+| `abstract int ChannelCount { get; }` | Channels per frame. `Music` and `SoundEffect` take 1 or 2. |
+| `virtual long LoopStart { get; }` | The loop start the data suggests, in frames. `0` unless overridden. |
+| `virtual long? LoopEnd { get; }` | The loop end the data suggests, in frames. `null`, the end of the source, unless overridden. |
+| `abstract int Read(Span<float> samples)` | Fills the span with the next interleaved frames and returns how many frames it wrote. Returns fewer than fit only at the end of the source, and `0` once it is reached. |
+| `abstract void Seek(long frame)` | Makes `frame` the next frame `Read` returns. It lands on that exact frame. |
+| `void Dispose()` | Calls `Dispose(true)`. |
+| `protected virtual void Dispose(bool disposing)` | Override to release what the source holds. |
+
+## VorbisAudioSource
+`public sealed class VorbisAudioSource : AudioSource`
+
+Decodes a mono or stereo Ogg Vorbis stream. It keeps the encoded file in memory and decodes on demand.
+
+| Member | Meaning |
+|---|---|
+| `VorbisAudioSource(string path)` | Reads an Ogg Vorbis file from disk. |
+| `VorbisAudioSource(Stream stream, bool leaveOpen = false)` | Reads the stream from its current position to its end, then disposes it unless `leaveOpen` is `true`. |
+| `long FrameCount { get; }` | The length in frames. |
+| `long LoopStart { get; }` | The `LOOPSTART` comment, or `0`. |
+| `long? LoopEnd { get; }` | The `LOOPEND` comment, or `LOOPSTART` plus the `LOOPLENGTH` comment, or `null`. |
+| `int Read(Span<float> samples)` | Throws `ArgumentException` when the span's length isn't a multiple of `ChannelCount`. |
+| `void Seek(long frame)` | Frames past the end are clamped to `FrameCount`. Throws `ArgumentOutOfRangeException` for negative frames and `InvalidDataException` when the stream is damaged. |
+
+**Errors.** The constructors throw `InvalidDataException` when the data isn't an Ogg Vorbis stream and `NotSupportedException` for more than two channels.
+
+**Loop comments.** The comments count frames at the stream's own sample rate and their names are matched without regard to case.
+
+**Seeking.** Reading after a seek returns the same samples as reading through from the start to that frame.
 
 ## SoundState
 `public enum SoundState`

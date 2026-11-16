@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Audio/*.ogg" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../src/Crystal.Framework/Crystal.Framework.csproj" />
     <ProjectReference Include="../../src/Crystal.ImGui/Crystal.ImGui.csproj" />
   </ItemGroup>

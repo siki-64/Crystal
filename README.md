@@ -308,15 +308,21 @@ _mixer.Play(_jump, volume: 0.8f, pan: -0.3f);
 _engine = new SoundEffectInstance(_mixer, engineLoop) { IsLooped = true };
 _engine.Play();
 _engine.Pitch = speed / maximumSpeed;
+
+_music = new Music(_mixer, new VorbisAudioSource("Music/Theme.ogg")) { IsLooped = true };
+_music.Play();
 ```
 
 - **`AudioMixer`**: a software mixer that renders stereo 32-bit float at 48 kHz by default. `Play` plays a sound once with a volume, pan and pitch. `MasterVolume` scales the whole mix, which is clamped to -1 to 1.
-- **`SoundEffect`**: decoded mono or stereo sound data, from float samples or from a WAVE file with `FromWav` (8 to 32-bit integer PCM and 32 or 64-bit float). It belongs to no mixer and can be loaded on any thread.
+- **`SoundEffect`**: decoded mono or stereo sound data, from float samples, from a WAVE file with `FromWav` (8 to 32-bit integer PCM and 32 or 64-bit float) or from any `AudioSource` with `FromSource`. It belongs to no mixer and can be loaded on any thread.
 - **`SoundEffectInstance`**: one playback you keep control of, with `Play`, `Pause`, `Stop`, `Volume`, `Pan` (-1 to 1), `Pitch` (octaves), `IsLooped` and `State`. Volume and pan changes ramp across one render, so they don't click.
+- **`Music`**: plays an `AudioSource` while a background thread decodes it about half a second ahead, with `Play`, `Pause`, `Stop`, `Volume`, `IsLooped` and `State`. With `IsLooped` it plays up to `LoopEnd` and then repeats from `LoopStart` without a gap, so an intro plays once. Dispose it to end the thread and close the source. A decode error stops the music and is kept in `Error`.
+- **`AudioSource`**: a stream of decoded frames with `Read` and `Seek`. Derive from it to play another format.
+- **`VorbisAudioSource`**: an `AudioSource` for mono or stereo Ogg Vorbis that seeks to the exact frame. The `LOOPSTART` and `LOOPEND` or `LOOPLENGTH` comments, in frames, become the loop points of the `Music` that plays it.
 - **`AudioDevice`**: opens the default playback device and pulls the mixer on SDL's audio thread. Dispose it before the game exits. It throws `AudioException` when the machine has no playback device, so catch that to run without sound.
 - **Without a device**: a mixer needs no device. `Render` fills a span with the next frames, which is how the tests check mixing sample by sample.
 - **Resampling**: sounds at another rate than the mixer's, or played with a pitch, are resampled with linear interpolation.
-- **Threading**: every mixer and instance member is safe to call from any thread.
+- **Threading**: every mixer, instance and music member is safe to call from any thread.
 - **No allocations**: once warmed up, playing and mixing allocate no managed memory.
 
 ## Dear ImGui

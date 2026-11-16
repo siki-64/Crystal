@@ -8,7 +8,7 @@ public sealed class AudioMixer
     private const int InitialVoiceCapacity = 64;
 
     private readonly Lock _gate = new();
-    private readonly List<SoundEffectInstance> _playing = new(InitialVoiceCapacity);
+    private readonly List<IAudioVoice> _playing = new(InitialVoiceCapacity);
     private readonly Stack<SoundEffectInstance> _pool = new(InitialVoiceCapacity);
     private float _masterVolume = 1f;
     private float _masterGain = 1f;
@@ -68,12 +68,12 @@ public sealed class AudioMixer
         {
             for (var index = _playing.Count - 1; index >= 0; index--)
             {
-                var instance = _playing[index];
-                if (instance.MixInto(output, SampleRate)) continue;
+                var voice = _playing[index];
+                if (voice.MixInto(output, SampleRate)) continue;
                 _playing.RemoveAt(index);
-                instance.State = SoundState.Stopped;
-                instance.Rewind();
-                if (instance.IsPooled) _pool.Push(instance);
+                voice.State = SoundState.Stopped;
+                voice.OnStopped();
+                if (voice is SoundEffectInstance { IsPooled: true } pooled) _pool.Push(pooled);
             }
         }
 
@@ -89,36 +89,38 @@ public sealed class AudioMixer
         _masterGain = targetGain;
     }
 
-    internal void Start(SoundEffectInstance instance)
+    internal Lock Gate => _gate;
+
+    internal void Start(IAudioVoice voice)
     {
-        lock (_gate) StartLocked(instance);
+        lock (_gate) StartLocked(voice);
     }
 
-    internal void Pause(SoundEffectInstance instance)
+    internal void Pause(IAudioVoice voice)
     {
         lock (_gate)
         {
-            if (instance.State != SoundState.Playing) return;
-            _playing.Remove(instance);
-            instance.State = SoundState.Paused;
+            if (voice.State != SoundState.Playing) return;
+            _playing.Remove(voice);
+            voice.State = SoundState.Paused;
         }
     }
 
-    internal void Stop(SoundEffectInstance instance)
+    internal void Stop(IAudioVoice voice)
     {
         lock (_gate)
         {
-            if (instance.State == SoundState.Playing) _playing.Remove(instance);
-            instance.State = SoundState.Stopped;
-            instance.Rewind();
+            if (voice.State == SoundState.Playing) _playing.Remove(voice);
+            voice.State = SoundState.Stopped;
+            voice.OnStopped();
         }
     }
 
-    private void StartLocked(SoundEffectInstance instance)
+    private void StartLocked(IAudioVoice voice)
     {
-        if (instance.State == SoundState.Playing) return;
-        instance.ForgetGains();
-        instance.State = SoundState.Playing;
-        _playing.Add(instance);
+        if (voice.State == SoundState.Playing) return;
+        voice.OnStarted();
+        voice.State = SoundState.Playing;
+        _playing.Add(voice);
     }
 }

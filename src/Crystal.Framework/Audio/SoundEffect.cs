@@ -1,7 +1,11 @@
+using System.Buffers;
+
 namespace Crystal.Audio;
 
 public sealed class SoundEffect
 {
+    private const int SourceChunkFrameCount = 4096;
+
     private readonly float[] _samples;
 
     public SoundEffect(ReadOnlySpan<float> samples, int sampleRate, int channelCount)
@@ -26,6 +30,21 @@ public sealed class SoundEffect
     public TimeSpan Duration => TimeSpan.FromSeconds((double)FrameCount / SampleRate);
 
     internal ReadOnlySpan<float> Samples => _samples;
+
+    public static SoundEffect FromSource(AudioSource source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        if (source.ChannelCount is not (1 or 2)) throw new ArgumentException("The source is mono or stereo.", nameof(source));
+        var samples = new ArrayBufferWriter<float>();
+        while (true)
+        {
+            var chunk = samples.GetSpan(SourceChunkFrameCount * source.ChannelCount);
+            var frameCount = source.Read(chunk[..(SourceChunkFrameCount * source.ChannelCount)]);
+            if (frameCount == 0) break;
+            samples.Advance(frameCount * source.ChannelCount);
+        }
+        return new SoundEffect(samples.WrittenSpan.ToArray(), source.SampleRate, source.ChannelCount);
+    }
 
     public static SoundEffect FromWav(Stream stream)
     {

@@ -11,7 +11,7 @@ Every public type of `Crystal.Framework` and `Crystal.ImGui`, grouped by namespa
 | [Crystal.Graphics: shaders](graphics-shaders.md) | `ShaderLibrary`, `ShaderProgram`, parameters, constant buffers, runtime program descriptions |
 | [Crystal.Graphics: 2D](graphics-2d.md) | `SpriteBatch`, `SpriteFont`, `SpriteFontGlyph` |
 | [Crystal.Input](input.md) | `Keyboard`, `Mouse`, `GamePad` and their states |
-| [Crystal.Audio](audio.md) | `AudioMixer`, `SoundEffect`, `SoundEffectInstance`, `SoundState`, `AudioDevice`, `AudioException` |
+| [Crystal.Audio](audio.md) | `AudioMixer`, `SoundEffect`, `SoundEffectInstance`, `Music`, `AudioSource`, `VorbisAudioSource`, `SoundState`, `AudioDevice`, `AudioException` |
 | [Crystal.ImGui](imgui.md) | `ImGuiRenderer`, the UTF-8 helpers, `ImVector<T>`, and the rules that map Dear ImGui's C API to the generated binding |
 
 ## Conventions
