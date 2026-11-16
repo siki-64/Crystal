@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="TerraFX.Interop.Windows" />
+    <PackageReference Include="StbVorbisSharp" />
     <PackageReference Include="Microsoft.Direct3D.D3D12" GeneratePathProperty="true" ExcludeAssets="all" />
   </ItemGroup>
 

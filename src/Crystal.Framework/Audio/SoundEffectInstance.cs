@@ -7,7 +7,7 @@ public enum SoundState
     Paused,
 }
 
-public sealed class SoundEffectInstance
+public sealed class SoundEffectInstance : IAudioVoice
 {
     private readonly AudioMixer _mixer;
     private SoundEffect _sound;
@@ -34,7 +34,13 @@ public sealed class SoundEffectInstance
 
     public SoundEffect Sound => _sound;
     public bool IsLooped { get; set; }
-    public SoundState State { get; internal set; }
+    public SoundState State { get; private set; }
+
+    SoundState IAudioVoice.State
+    {
+        get => State;
+        set => State = value;
+    }
 
     public float Volume
     {
@@ -82,11 +88,11 @@ public sealed class SoundEffectInstance
         Pitch = pitch;
     }
 
-    internal void Rewind() => _position = 0;
+    void IAudioVoice.OnStarted() => _hasGains = false;
 
-    internal void ForgetGains() => _hasGains = false;
+    void IAudioVoice.OnStopped() => _position = 0;
 
-    internal bool MixInto(Span<float> output, int outputSampleRate)
+    bool IAudioVoice.MixInto(Span<float> output, int outputSampleRate)
     {
         var sound = _sound;
         var samples = sound.Samples;
