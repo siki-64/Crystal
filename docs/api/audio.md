@@ -122,6 +122,25 @@ Decodes a mono or stereo Ogg Vorbis stream. It keeps the encoded file in memory 
 
 **Seeking.** Reading after a seek returns the same samples as reading through from the start to that frame.
 
+## Mp3AudioSource
+`public sealed class Mp3AudioSource : AudioSource`
+
+Decodes a mono or stereo MPEG audio stream (MP3). It keeps the encoded file in memory and decodes on demand.
+
+| Member | Meaning |
+|---|---|
+| `Mp3AudioSource(string path)` | Reads an MP3 file from disk. |
+| `Mp3AudioSource(Stream stream, bool leaveOpen = false)` | Reads the stream from its current position to its end, then disposes it unless `leaveOpen` is `true`. |
+| `long FrameCount { get; }` | The length in frames, a whole number of MPEG frames. |
+| `int Read(Span<float> samples)` | Throws `ArgumentException` when the span's length isn't a multiple of `ChannelCount`. |
+| `void Seek(long frame)` | Frames past the end are clamped to `FrameCount`. Throws `ArgumentOutOfRangeException` for negative frames and `InvalidDataException` when the stream is damaged. |
+
+**Errors.** The constructors throw `InvalidDataException` when the data isn't an MPEG audio stream and `NotSupportedException` for more than two channels.
+
+**Encoder delay.** The frames come out as the stream holds them, including the silence an encoder puts in front of the signal; the source reads no gapless tags.
+
+**Seeking.** Reading after a seek returns the same samples as reading through from the start to that frame. A seek backwards decodes again from the start, so its cost grows with the target frame.
+
 ## SoundState
 `public enum SoundState`
 

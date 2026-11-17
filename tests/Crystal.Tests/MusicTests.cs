@@ -13,6 +13,12 @@ public sealed class MusicTests
     private const int SineLoopEnd = 8820;
     private const string NoisePath = "Audio/Noise.ogg";
     private const int NoiseFrameCount = 88200;
+    private const string SineMp3Path = "Audio/Sine.mp3";
+    private const int SineMp3FrameCount = 12672;
+    private const int SineMp3EncodedFrameCount = 11025;
+    private const string ToneMp3Path = "Audio/Tone.mp3";
+    private const int ToneMp3FrameCount = 45504;
+    private const int Mp3EncoderDelayFrameCount = 1105;
 
     [TestMethod]
     public void StreamedSourceLongerThanTheBufferPlaysGaplessAndStops()
@@ -285,6 +291,57 @@ public sealed class MusicTests
     public void VorbisSourceRejectsOtherData()
     {
         Assert.ThrowsExactly<InvalidDataException>(() => new VorbisAudioSource(new MemoryStream(new byte[256])));
+    }
+
+    [TestMethod]
+    public void Mp3SourceDecodesTheEncodedSignal()
+    {
+        using var source = new Mp3AudioSource(SineMp3Path);
+        Assert.AreEqual((44100, 2, (long)SineMp3FrameCount), (source.SampleRate, source.ChannelCount, source.FrameCount));
+        Assert.AreEqual((0L, (long?)null), (source.LoopStart, source.LoopEnd));
+
+        var decoded = ReadAll(source);
+        Assert.HasCount(SineMp3FrameCount * 2, decoded);
+        for (var frame = 0; frame < Mp3EncoderDelayFrameCount - 100; frame++)
+            Assert.AreEqual(0f, decoded[frame * 2], 0.01f, $"Left of frame {frame} inside the encoder delay");
+        for (var frame = 100; frame < SineMp3EncodedFrameCount - 100; frame++)
+        {
+            var seconds = frame / 44100.0;
+            var decodedFrame = frame + Mp3EncoderDelayFrameCount;
+            Assert.AreEqual(0.5 * Math.Sin(2 * Math.PI * 441 * seconds), decoded[decodedFrame * 2], 0.05, $"Left of frame {frame}");
+            Assert.AreEqual(0.25 * Math.Sin(2 * Math.PI * 882 * seconds), decoded[decodedFrame * 2 + 1], 0.05, $"Right of frame {frame}");
+        }
+
+        source.Seek(0);
+        var sound = SoundEffect.FromSource(source);
+        Assert.AreEqual((44100, 2, SineMp3FrameCount), (sound.SampleRate, sound.ChannelCount, sound.FrameCount));
+    }
+
+    [TestMethod]
+    public void Mp3SourceSeeksToTheExactFrame()
+    {
+        using var source = new Mp3AudioSource(ToneMp3Path);
+        Assert.AreEqual((22050, 1, (long)ToneMp3FrameCount), (source.SampleRate, source.ChannelCount, source.FrameCount));
+        var decoded = ReadAll(source);
+        Assert.HasCount(ToneMp3FrameCount, decoded);
+
+        var random = new Random(5);
+        var afterSeek = new float[3000];
+        long[] edgeFrames = [0, 1, 1151, 1152, 1153, ToneMp3FrameCount / 2, ToneMp3FrameCount - 3000, ToneMp3FrameCount - 1, ToneMp3FrameCount, ToneMp3FrameCount + 500, 7];
+        foreach (var frame in edgeFrames.Concat(Enumerable.Range(0, 50).Select(_ => random.NextInt64(ToneMp3FrameCount))))
+        {
+            source.Seek(frame);
+            var expectedCount = (int)Math.Clamp(ToneMp3FrameCount - frame, 0, afterSeek.Length);
+            Assert.AreEqual(expectedCount, ReadFully(source, afterSeek), $"Frames read after seeking to {frame}");
+            Assert.IsTrue(afterSeek.AsSpan(0, expectedCount).SequenceEqual(decoded.AsSpan((int)Math.Min(frame, ToneMp3FrameCount), expectedCount)), $"Samples after seeking to {frame}");
+        }
+    }
+
+    [TestMethod]
+    public void Mp3SourceRejectsOtherData()
+    {
+        Assert.ThrowsExactly<InvalidDataException>(() => new Mp3AudioSource(new MemoryStream(new byte[256])));
+        Assert.ThrowsExactly<InvalidDataException>(() => new Mp3AudioSource(new MemoryStream()));
     }
 
     private static void Pump(Music music)
