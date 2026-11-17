@@ -319,6 +319,7 @@ _music.Play();
 - **`Music`**: plays an `AudioSource` while a background thread decodes it about half a second ahead, with `Play`, `Pause`, `Stop`, `Volume`, `IsLooped` and `State`. With `IsLooped` it plays up to `LoopEnd` and then repeats from `LoopStart` without a gap, so an intro plays once. Dispose it to end the thread and close the source. A decode error stops the music and is kept in `Error`.
 - **`AudioSource`**: a stream of decoded frames with `Read` and `Seek`. Derive from it to play another format.
 - **`VorbisAudioSource`**: an `AudioSource` for mono or stereo Ogg Vorbis that seeks to the exact frame. The `LOOPSTART` and `LOOPEND` or `LOOPLENGTH` comments, in frames, become the loop points of the `Music` that plays it.
+- **`Mp3AudioSource`**: an `AudioSource` for mono or stereo MP3 that seeks to the exact frame. It keeps the encoder delay in front of the signal.
 - **`AudioDevice`**: opens the default playback device and pulls the mixer on SDL's audio thread. Dispose it before the game exits. It throws `AudioException` when the machine has no playback device, so catch that to run without sound.
 - **Without a device**: a mixer needs no device. `Render` fills a span with the next frames, which is how the tests check mixing sample by sample.
 - **Resampling**: sounds at another rate than the mixer's, or played with a pitch, are resampled with linear interpolation.
