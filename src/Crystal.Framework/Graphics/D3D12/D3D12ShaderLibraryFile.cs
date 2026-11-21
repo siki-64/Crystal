@@ -1,5 +1,5 @@
 using System.Text;
-using static TerraFX.Interop.DirectX.D3D_SHADER_VARIABLE_CLASS;
+using static Crystal.Interop.D3D_SHADER_VARIABLE_CLASS;
 
 namespace Crystal.Graphics.D3D12;
 

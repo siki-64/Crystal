@@ -1,8 +1,7 @@
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
-using TerraFX.Interop.Windows;
-using static TerraFX.Interop.Windows.WAVE;
-using static TerraFX.Interop.Windows.Windows;
+using Crystal.Interop;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Audio;
 
@@ -100,8 +99,8 @@ internal static unsafe class WavFile
 
     private static ushort EncodingOf(in Guid subFormat)
     {
-        if (subFormat == *(Guid*)__uuidof<KSDATAFORMAT_SUBTYPE_PCM>()) return WAVE_FORMAT_PCM;
-        if (subFormat == *(Guid*)__uuidof<KSDATAFORMAT_SUBTYPE_IEEE_FLOAT>()) return WAVE_FORMAT_IEEE_FLOAT;
+        if (subFormat == IID_KSDATAFORMAT_SUBTYPE_PCM) return WAVE_FORMAT_PCM;
+        if (subFormat == IID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT) return WAVE_FORMAT_IEEE_FLOAT;
         return WAVE_FORMAT_EXTENSIBLE;
     }
 

@@ -1,17 +1,16 @@
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12Interop;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_LAYOUT;
-using static TerraFX.Interop.DirectX.D3D12_DESCRIPTOR_HEAP_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_DESCRIPTOR_HEAP_TYPE;
-using static TerraFX.Interop.DirectX.DXGI;
-using static TerraFX.Interop.DirectX.DXGI_ALPHA_MODE;
-using static TerraFX.Interop.DirectX.DXGI_FEATURE;
-using static TerraFX.Interop.DirectX.DXGI_FORMAT;
-using static TerraFX.Interop.DirectX.DXGI_SCALING;
-using static TerraFX.Interop.DirectX.DXGI_SWAP_CHAIN_FLAG;
-using static TerraFX.Interop.DirectX.DXGI_SWAP_EFFECT;
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.D3D12_BARRIER_LAYOUT;
+using static Crystal.Interop.D3D12_DESCRIPTOR_HEAP_FLAGS;
+using static Crystal.Interop.D3D12_DESCRIPTOR_HEAP_TYPE;
+using static Crystal.Interop.DXGI;
+using static Crystal.Interop.DXGI_ALPHA_MODE;
+using static Crystal.Interop.DXGI_FEATURE;
+using static Crystal.Interop.DXGI_FORMAT;
+using static Crystal.Interop.DXGI_SCALING;
+using static Crystal.Interop.DXGI_SWAP_CHAIN_FLAG;
+using static Crystal.Interop.DXGI_SWAP_EFFECT;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics.D3D12;
 
@@ -26,7 +25,7 @@ internal sealed unsafe class D3D12SwapChain : IDisposable
     private IDXGISwapChain3* _swapChain;
     private ID3D12DescriptorHeap* _renderTargetViewHeap;
     private readonly uint _renderTargetViewSize;
-    private HANDLE _frameLatencyWaitable;
+    private void* _frameLatencyWaitable;
 
     public D3D12SwapChain(D3D12Device device, nint windowHandle, int width, int height, int maximumFrameLatency)
     {
@@ -41,7 +40,7 @@ internal sealed unsafe class D3D12SwapChain : IDisposable
             Width = (uint)Width,
             Height = (uint)Height,
             Format = Format,
-            SampleDesc = new DXGI_SAMPLE_DESC(1, 0),
+            SampleDesc = new DXGI_SAMPLE_DESC { Count = 1, Quality = 0 },
             BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
             BufferCount = BufferCount,
             Scaling = DXGI_SCALING_STRETCH,
@@ -52,7 +51,7 @@ internal sealed unsafe class D3D12SwapChain : IDisposable
 
         IDXGISwapChain1* swapChain1 = null;
         ThrowOnFailure(
-            device.Factory->CreateSwapChainForHwnd((IUnknown*)device.DirectQueue.Queue, (HWND)windowHandle, &description, null, null, &swapChain1),
+            device.Factory->CreateSwapChainForHwnd((IUnknown*)device.DirectQueue.Queue, (HWND__*)windowHandle, &description, null, null, &swapChain1),
             "IDXGIFactory2::CreateSwapChainForHwnd");
         try
         {
@@ -65,7 +64,7 @@ internal sealed unsafe class D3D12SwapChain : IDisposable
             Release(ref swapChain1);
         }
 
-        ThrowOnFailure(device.Factory->MakeWindowAssociation((HWND)windowHandle, DXGI_MWA_NO_ALT_ENTER), "IDXGIFactory::MakeWindowAssociation");
+        ThrowOnFailure(device.Factory->MakeWindowAssociation((HWND__*)windowHandle, DXGI_MWA_NO_ALT_ENTER), "IDXGIFactory::MakeWindowAssociation");
         ThrowOnFailure(_swapChain->SetMaximumFrameLatency((uint)maximumFrameLatency), "IDXGISwapChain2::SetMaximumFrameLatency");
         _frameLatencyWaitable = _swapChain->GetFrameLatencyWaitableObject();
 
@@ -114,7 +113,7 @@ internal sealed unsafe class D3D12SwapChain : IDisposable
         AcquireBuffers();
     }
 
-    public HRESULT Present(bool vSync)
+    public int Present(bool vSync)
     {
         var syncInterval = vSync ? 1u : 0u;
         var flags = !vSync && SupportsTearing ? DXGI_PRESENT_ALLOW_TEARING : 0u;
@@ -155,7 +154,7 @@ internal sealed unsafe class D3D12SwapChain : IDisposable
 
     private static bool QueryTearingSupport(IDXGIFactory6* factory)
     {
-        BOOL allowTearing = FALSE;
-        return SUCCEEDED(factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, (uint)sizeof(BOOL))) && allowTearing;
+        int allowTearing = FALSE;
+        return SUCCEEDED(factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, (uint)sizeof(int))) && allowTearing != FALSE;
     }
 }

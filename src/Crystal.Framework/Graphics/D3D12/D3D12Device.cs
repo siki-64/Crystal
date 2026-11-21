@@ -1,25 +1,24 @@
 using System.Text;
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12Interop;
-using static TerraFX.Interop.DirectX.D3D_FEATURE_LEVEL;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_LAYOUT;
-using static TerraFX.Interop.DirectX.D3D12_COMMAND_LIST_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_DESCRIPTOR_HEAP_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_DRED_ENABLEMENT;
-using static TerraFX.Interop.DirectX.D3D12_FEATURE;
-using static TerraFX.Interop.DirectX.D3D12_HEAP_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_INDIRECT_ARGUMENT_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_RESOURCE_DIMENSION;
-using static TerraFX.Interop.DirectX.D3D12_RESOURCE_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_TEXTURE_LAYOUT;
-using static TerraFX.Interop.DirectX.DirectX;
-using static TerraFX.Interop.DirectX.DXGI;
-using static TerraFX.Interop.DirectX.DXGI_ADAPTER_FLAG;
-using static TerraFX.Interop.DirectX.DXGI_FORMAT;
-using static TerraFX.Interop.DirectX.DXGI_GPU_PREFERENCE;
-using static TerraFX.Interop.DirectX.DXGI_MEMORY_SEGMENT_GROUP;
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.D3D_FEATURE_LEVEL;
+using static Crystal.Interop.D3D12_BARRIER_LAYOUT;
+using static Crystal.Interop.D3D12_COMMAND_LIST_TYPE;
+using static Crystal.Interop.D3D12_DESCRIPTOR_HEAP_TYPE;
+using static Crystal.Interop.D3D12_DRED_ENABLEMENT;
+using static Crystal.Interop.D3D12_FEATURE;
+using static Crystal.Interop.D3D12_HEAP_FLAGS;
+using static Crystal.Interop.D3D12_INDIRECT_ARGUMENT_TYPE;
+using static Crystal.Interop.D3D12_RESOURCE_DIMENSION;
+using static Crystal.Interop.D3D12_RESOURCE_FLAGS;
+using static Crystal.Interop.D3D12_TEXTURE_LAYOUT;
+using static Crystal.Interop.D3D12;
+using static Crystal.Interop.DXGI;
+using static Crystal.Interop.DXGI_ADAPTER_FLAG;
+using static Crystal.Interop.DXGI_FORMAT;
+using static Crystal.Interop.DXGI_GPU_PREFERENCE;
+using static Crystal.Interop.DXGI_MEMORY_SEGMENT_GROUP;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics.D3D12;
 
@@ -163,7 +162,7 @@ internal sealed unsafe class D3D12Device : IDisposable
         DepthOrArraySize = 1,
         MipLevels = 1,
         Format = DXGI_FORMAT_UNKNOWN,
-        SampleDesc = new DXGI_SAMPLE_DESC(1, 0),
+        SampleDesc = new DXGI_SAMPLE_DESC { Count = 1, Quality = 0 },
         Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
         Flags = flags,
     };
@@ -190,10 +189,10 @@ internal sealed unsafe class D3D12Device : IDisposable
             && levels.NumQualityLevels > 0;
     }
 
-    public void ThrowIfPresentFailed(HRESULT result)
+    public void ThrowIfPresentFailed(int result)
     {
         if (result == DXGI_ERROR_DEVICE_REMOVED || result == DXGI_ERROR_DEVICE_RESET)
-            throw new GraphicsException($"The D3D12 device was removed (reason 0x{_device->GetDeviceRemovedReason().Value:X8}).");
+            throw new GraphicsException($"The D3D12 device was removed (reason 0x{_device->GetDeviceRemovedReason():X8}).");
         ThrowOnFailure(result, "IDXGISwapChain::Present");
     }
 
@@ -238,7 +237,7 @@ internal sealed unsafe class D3D12Device : IDisposable
         if (!File.Exists(Path.Combine(sdkPath, "D3D12Core.dll"))) return null;
 
         ID3D12SDKConfiguration1* configuration = null;
-        if (FAILED(D3D12GetInterface(AddressOf(in CLSID.CLSID_D3D12SDKConfiguration), __uuidof<ID3D12SDKConfiguration1>(), (void**)&configuration)))
+        if (FAILED(D3D12GetInterface(AddressOf(in CLSID_D3D12SDKConfiguration), __uuidof<ID3D12SDKConfiguration1>(), (void**)&configuration)))
             return null;
 
         try
@@ -262,10 +261,10 @@ internal sealed unsafe class D3D12Device : IDisposable
     {
         ID3D12Debug1* debug = null;
         var result = deviceFactory != null
-            ? deviceFactory->GetConfigurationInterface(AddressOf(in CLSID.CLSID_D3D12Debug), __uuidof<ID3D12Debug1>(), (void**)&debug)
+            ? deviceFactory->GetConfigurationInterface(AddressOf(in CLSID_D3D12Debug), __uuidof<ID3D12Debug1>(), (void**)&debug)
             : D3D12GetDebugInterface(__uuidof<ID3D12Debug1>(), (void**)&debug);
         if (FAILED(result))
-            throw new GraphicsException($"The D3D12 debug layer is unavailable (HRESULT 0x{result.Value:X8}). Install the Graphics Tools optional feature.");
+            throw new GraphicsException($"The D3D12 debug layer is unavailable (HRESULT 0x{result:X8}). Install the Graphics Tools optional feature.");
 
         debug->EnableDebugLayer();
         if (gpuBasedValidation) debug->SetEnableGPUBasedValidation(TRUE);
@@ -273,7 +272,7 @@ internal sealed unsafe class D3D12Device : IDisposable
 
         ID3D12DeviceRemovedExtendedDataSettings* dred = null;
         result = deviceFactory != null
-            ? deviceFactory->GetConfigurationInterface(AddressOf(in CLSID.CLSID_D3D12DeviceRemovedExtendedData), __uuidof<ID3D12DeviceRemovedExtendedDataSettings>(), (void**)&dred)
+            ? deviceFactory->GetConfigurationInterface(AddressOf(in CLSID_D3D12DeviceRemovedExtendedData), __uuidof<ID3D12DeviceRemovedExtendedDataSettings>(), (void**)&dred)
             : D3D12GetDebugInterface(__uuidof<ID3D12DeviceRemovedExtendedDataSettings>(), (void**)&dred);
         if (SUCCEEDED(result))
         {
@@ -348,7 +347,7 @@ internal sealed unsafe class D3D12Device : IDisposable
             : D3D12CreateDevice((IUnknown*)adapter, MinimumFeatureLevel, __uuidof<ID3D12Device10>(), (void**)&device);
         if (FAILED(result))
         {
-            failure = $"HRESULT 0x{result.Value:X8}";
+            failure = $"HRESULT 0x{result:X8}";
             return null;
         }
 
@@ -374,7 +373,7 @@ internal sealed unsafe class D3D12Device : IDisposable
     {
         D3D12_FEATURE_DATA_D3D12_OPTIONS12 options = default;
         return SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &options, (uint)sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS12)))
-            && options.EnhancedBarriersSupported;
+            && options.EnhancedBarriersSupported != FALSE;
     }
 
     private static bool SupportsDescriptorIndexing(ID3D12Device10* device)
@@ -391,10 +390,8 @@ internal sealed unsafe class D3D12Device : IDisposable
     {
         DXGI_ADAPTER_DESC1 description;
         ThrowOnFailure(adapter->GetDesc1(&description), "IDXGIAdapter1::GetDesc1");
-        ReadOnlySpan<char> name = description.Description;
-        var terminator = name.IndexOf('\0');
         return new GraphicsAdapterInfo(
-            (terminator < 0 ? name : name[..terminator]).ToString(),
+            new string((char*)&description.Description),
             description.VendorId,
             description.DeviceId,
             description.DedicatedVideoMemory,

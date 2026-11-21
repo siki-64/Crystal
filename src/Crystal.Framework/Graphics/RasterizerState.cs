@@ -1,5 +1,5 @@
-using static TerraFX.Interop.DirectX.D3D12_CULL_MODE;
-using static TerraFX.Interop.DirectX.D3D12_FILL_MODE;
+using static Crystal.Interop.D3D12_CULL_MODE;
+using static Crystal.Interop.D3D12_FILL_MODE;
 
 namespace Crystal.Graphics;
 

@@ -1,5 +1,6 @@
+using Crystal.Interop;
 using Crystal.Platform;
-using TerraFX.Interop.Windows;
+using static Crystal.Interop.Windows;
 
 namespace Crystal;
 
@@ -63,7 +64,7 @@ public sealed unsafe class GameWindow : IDisposable
             if (IsHosted)
             {
                 RECT client;
-                if (!Windows.GetClientRect((HWND)Handle, &client)) return Point.Zero;
+                if (Windows.GetClientRect((HWND__*)Handle, &client) == FALSE) return Point.Zero;
                 return new Point(client.right - client.left, client.bottom - client.top);
             }
 
@@ -108,11 +109,11 @@ public sealed unsafe class GameWindow : IDisposable
         }
     }
 
-    public void Minimize() => Windows.ShowWindow((HWND)Handle, SW.SW_MINIMIZE);
+    public void Minimize() => Windows.ShowWindow((HWND__*)Handle, SW_MINIMIZE);
 
-    public void ToggleMaximized() => Windows.ShowWindow((HWND)Handle, Windows.IsZoomed((HWND)Handle) ? SW.SW_RESTORE : SW.SW_MAXIMIZE);
+    public void ToggleMaximized() => Windows.ShowWindow((HWND__*)Handle, Windows.IsZoomed((HWND__*)Handle) != FALSE ? SW_RESTORE : SW_MAXIMIZE);
 
-    public bool IsMinimized => IsHosted ? Windows.IsIconic((HWND)Handle) : (Sdl.GetWindowFlags(_window) & Sdl.WindowMinimized) != 0;
+    public bool IsMinimized => IsHosted ? Windows.IsIconic((HWND__*)Handle) != FALSE : (Sdl.GetWindowFlags(_window) & Sdl.WindowMinimized) != 0;
 
     public bool IsTextInputEnabled
     {
@@ -147,7 +148,7 @@ public sealed unsafe class GameWindow : IDisposable
 
     internal bool HasTextInputHandlers => TextInput != null;
 
-    internal bool IsHostForeground => Windows.GetForegroundWindow() == (HWND)Handle;
+    internal bool IsHostForeground => Windows.GetForegroundWindow() == (HWND__*)Handle;
 
     internal void Show()
     {

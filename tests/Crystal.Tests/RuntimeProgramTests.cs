@@ -2,7 +2,7 @@ using System.Numerics;
 using System.Text;
 using Crystal.Graphics;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
+using Crystal.Interop;
 using static Crystal.Tests.GraphicsTestHelpers;
 
 namespace Crystal.Tests;
@@ -161,16 +161,16 @@ public sealed class RuntimeProgramTests
         var sourceBytes = Encoding.UTF8.GetBytes(source);
         var entryPoint = "main\0"u8;
         var target = Encoding.ASCII.GetBytes(profile + "\0");
-        ID3DBlob* code = null;
-        ID3DBlob* errors = null;
+        ID3D10Blob* code = null;
+        ID3D10Blob* errors = null;
         try
         {
             fixed (byte* sourcePointer = sourceBytes)
             fixed (byte* entryPointer = entryPoint)
             fixed (byte* targetPointer = target)
             {
-                var result = DirectX.D3DCompile(sourcePointer, (nuint)sourceBytes.Length, null, null, null, (sbyte*)entryPointer, (sbyte*)targetPointer, 0, 0, &code, &errors);
-                if (result.FAILED)
+                var result = D3DCompiler.D3DCompile(sourcePointer, (nuint)sourceBytes.Length, null, null, null, (sbyte*)entryPointer, (sbyte*)targetPointer, 0, 0, &code, &errors);
+                if (Windows.FAILED(result))
                 {
                     var message = errors == null ? "" : Encoding.UTF8.GetString((byte*)errors->GetBufferPointer(), (int)errors->GetBufferSize());
                     Assert.Fail($"D3DCompile {profile} failed: {message}");

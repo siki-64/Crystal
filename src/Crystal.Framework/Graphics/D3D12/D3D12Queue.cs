@@ -1,9 +1,8 @@
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12Interop;
-using static TerraFX.Interop.DirectX.D3D12_COMMAND_QUEUE_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_FENCE_FLAGS;
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.D3D12_COMMAND_QUEUE_FLAGS;
+using static Crystal.Interop.D3D12_FENCE_FLAGS;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics.D3D12;
 
@@ -70,7 +69,7 @@ internal sealed unsafe class D3D12Queue : IDisposable
     public void WaitForValue(ulong value)
     {
         if (IsComplete(value)) return;
-        ThrowOnFailure(_fence->SetEventOnCompletion(value, HANDLE.NULL), "ID3D12Fence::SetEventOnCompletion");
+        ThrowOnFailure(_fence->SetEventOnCompletion(value, null), "ID3D12Fence::SetEventOnCompletion");
     }
 
     public void WaitForIdle() => WaitForValue(Signal());

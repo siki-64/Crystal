@@ -1,15 +1,15 @@
 using System.Runtime.InteropServices;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_LAYOUT;
-using static TerraFX.Interop.DirectX.D3D12_BUFFER_SRV_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_BUFFER_UAV_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_HEAP_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_RESOURCE_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_SRV_DIMENSION;
-using static TerraFX.Interop.DirectX.D3D12_UAV_DIMENSION;
-using static TerraFX.Interop.DirectX.DXGI_FORMAT;
-using static TerraFX.Interop.DirectX.D3D12;
+using Crystal.Interop;
+using static Crystal.Interop.D3D12_BARRIER_LAYOUT;
+using static Crystal.Interop.D3D12_BUFFER_SRV_FLAGS;
+using static Crystal.Interop.D3D12_BUFFER_UAV_FLAGS;
+using static Crystal.Interop.D3D12_HEAP_TYPE;
+using static Crystal.Interop.D3D12_RESOURCE_FLAGS;
+using static Crystal.Interop.D3D12_SRV_DIMENSION;
+using static Crystal.Interop.D3D12_UAV_DIMENSION;
+using static Crystal.Interop.DXGI_FORMAT;
+using static Crystal.Interop.D3D12;
 
 namespace Crystal.Graphics;
 

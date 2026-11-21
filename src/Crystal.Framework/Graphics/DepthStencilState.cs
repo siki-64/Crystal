@@ -1,4 +1,4 @@
-using static TerraFX.Interop.DirectX.D3D12_STENCIL_OP;
+using static Crystal.Interop.D3D12_STENCIL_OP;
 
 namespace Crystal.Graphics;
 

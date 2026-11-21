@@ -1,9 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.D3D12_MESSAGE_CALLBACK_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_MESSAGE_SEVERITY;
-using static TerraFX.Interop.Windows.Windows;
+using Crystal.Interop;
+using static Crystal.Interop.D3D12_MESSAGE_CALLBACK_FLAGS;
+using static Crystal.Interop.D3D12_MESSAGE_SEVERITY;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics.D3D12;
 
@@ -56,7 +56,7 @@ internal sealed unsafe class D3D12DebugMessages : IDisposable
         _self.Free();
     }
 
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
     private static void OnMessage(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, sbyte* description, void* context)
     {
         if (GCHandle.FromIntPtr((nint)context).Target is not D3D12DebugMessages messages) return;

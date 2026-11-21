@@ -1,7 +1,7 @@
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_ACCESS;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_SYNC;
+using Crystal.Interop;
+using static Crystal.Interop.D3D12_BARRIER_ACCESS;
+using static Crystal.Interop.D3D12_BARRIER_SYNC;
 
 namespace Crystal.Graphics;
 

@@ -1,10 +1,9 @@
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.D3D12_CONSERVATIVE_RASTERIZATION_MODE;
-using static TerraFX.Interop.DirectX.D3D12_DEPTH_WRITE_MASK;
-using static TerraFX.Interop.DirectX.D3D12_LOGIC_OP;
-using static TerraFX.Interop.DirectX.D3D12;
-using static TerraFX.Interop.DirectX.DirectX;
-using static TerraFX.Interop.Windows.Windows;
+using Crystal.Interop;
+using static Crystal.Interop.D3D12_CONSERVATIVE_RASTERIZATION_MODE;
+using static Crystal.Interop.D3D12_DEPTH_WRITE_MASK;
+using static Crystal.Interop.D3D12_LOGIC_OP;
+using static Crystal.Interop.D3D12;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics.D3D12;
 

@@ -1,8 +1,7 @@
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12Interop;
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics;
 
@@ -51,7 +50,7 @@ public sealed unsafe class ComputePipeline : GraphicsResource
             ID3D12PipelineState* pipelineState;
             var result = device.Device->CreateComputePipelineState(&description, __uuidof<ID3D12PipelineState>(), (void**)&pipelineState);
             if (FAILED(result))
-                throw new GraphicsException($"Creating compute pipeline '{name}' failed (HRESULT 0x{result.Value:X8}). Enable the debug layer with CRYSTAL_DX12_DEBUG=1 for details.");
+                throw new GraphicsException($"Creating compute pipeline '{name}' failed (HRESULT 0x{result:X8}). Enable the debug layer with CRYSTAL_DX12_DEBUG=1 for details.");
             SetName((ID3D12Object*)pipelineState, name);
             return pipelineState;
         }

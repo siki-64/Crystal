@@ -1,5 +1,5 @@
-using static TerraFX.Interop.DirectX.D3D_SHADER_VARIABLE_CLASS;
-using static TerraFX.Interop.DirectX.D3D_SRV_DIMENSION;
+using static Crystal.Interop.D3D_SHADER_VARIABLE_CLASS;
+using static Crystal.Interop.D3D_SRV_DIMENSION;
 
 namespace Crystal.Graphics;
 

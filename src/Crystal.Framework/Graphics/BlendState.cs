@@ -1,6 +1,6 @@
-using static TerraFX.Interop.DirectX.D3D12_BLEND;
-using static TerraFX.Interop.DirectX.D3D12_BLEND_OP;
-using static TerraFX.Interop.DirectX.D3D12_COLOR_WRITE_ENABLE;
+using static Crystal.Interop.D3D12_BLEND;
+using static Crystal.Interop.D3D12_BLEND_OP;
+using static Crystal.Interop.D3D12_COLOR_WRITE_ENABLE;
 
 namespace Crystal.Graphics;
 

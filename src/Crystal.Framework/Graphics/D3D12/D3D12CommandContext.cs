@@ -1,10 +1,10 @@
 using System.Runtime.InteropServices;
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_ACCESS;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_LAYOUT;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_SYNC;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_TYPE;
-using static TerraFX.Interop.DirectX.D3D12;
+using Crystal.Interop;
+using static Crystal.Interop.D3D12_BARRIER_ACCESS;
+using static Crystal.Interop.D3D12_BARRIER_LAYOUT;
+using static Crystal.Interop.D3D12_BARRIER_SYNC;
+using static Crystal.Interop.D3D12_BARRIER_TYPE;
+using static Crystal.Interop.D3D12;
 
 namespace Crystal.Graphics.D3D12;
 

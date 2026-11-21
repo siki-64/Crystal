@@ -1,0 +1,10 @@
+--method-class-name
+D3DCompiler
+--library-path
+d3dcompiler_47
+--file
+D3DCompilerEntry.h
+--traverse
+d3dcompiler.h
+--include
+D3DCompile

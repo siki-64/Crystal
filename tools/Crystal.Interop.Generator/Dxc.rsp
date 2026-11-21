@@ -1,0 +1,8 @@
+--method-class-name
+Dxc
+--library-path
+dxcompiler
+--file
+DxcEntry.h
+--traverse
+dxcapi.h

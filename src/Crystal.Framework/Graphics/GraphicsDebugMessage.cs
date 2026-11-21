@@ -1,4 +1,4 @@
-using static TerraFX.Interop.DirectX.D3D12_MESSAGE_SEVERITY;
+using static Crystal.Interop.D3D12_MESSAGE_SEVERITY;
 
 namespace Crystal.Graphics;
 

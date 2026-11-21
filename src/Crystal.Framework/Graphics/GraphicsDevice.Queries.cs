@@ -1,6 +1,6 @@
 ﻿using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.D3D12_QUERY_TYPE;
+using Crystal.Interop;
+using static Crystal.Interop.D3D12_QUERY_TYPE;
 
 namespace Crystal.Graphics;
 

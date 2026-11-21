@@ -1,16 +1,16 @@
 using System.Text;
-using TerraFX.Interop.DirectX;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12BindingLimits;
 using static Crystal.Graphics.D3D12.D3D12Interop;
-using static TerraFX.Interop.DirectX.D3D_ROOT_SIGNATURE_VERSION;
-using static TerraFX.Interop.DirectX.D3D12_DESCRIPTOR_RANGE_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_DESCRIPTOR_RANGE_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_ROOT_DESCRIPTOR_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_ROOT_PARAMETER_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_ROOT_SIGNATURE_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_SHADER_VISIBILITY;
-using static TerraFX.Interop.DirectX.DirectX;
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.D3D_ROOT_SIGNATURE_VERSION;
+using static Crystal.Interop.D3D12_DESCRIPTOR_RANGE_FLAGS;
+using static Crystal.Interop.D3D12_DESCRIPTOR_RANGE_TYPE;
+using static Crystal.Interop.D3D12_ROOT_DESCRIPTOR_FLAGS;
+using static Crystal.Interop.D3D12_ROOT_PARAMETER_TYPE;
+using static Crystal.Interop.D3D12_ROOT_SIGNATURE_FLAGS;
+using static Crystal.Interop.D3D12_SHADER_VISIBILITY;
+using static Crystal.Interop.D3D12;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics.D3D12;
 
@@ -114,8 +114,8 @@ internal static unsafe class D3D12RootSignatures
     private static ID3D12RootSignature* Create(
         D3D12Device device, D3D12_ROOT_PARAMETER1* parameters, int parameterCount, D3D12_ROOT_SIGNATURE_FLAGS flags, string name, string owner)
     {
-        ID3DBlob* serialized = null;
-        ID3DBlob* errors = null;
+        ID3D10Blob* serialized = null;
+        ID3D10Blob* errors = null;
         try
         {
             var description = new D3D12_VERSIONED_ROOT_SIGNATURE_DESC { Version = D3D_ROOT_SIGNATURE_VERSION_1_1 };
@@ -124,7 +124,7 @@ internal static unsafe class D3D12RootSignatures
             if (FAILED(result))
             {
                 var message = errors == null ? "" : Encoding.UTF8.GetString((byte*)errors->GetBufferPointer(), (int)errors->GetBufferSize()).TrimEnd('\0', '\n');
-                throw new GraphicsException($"{owner} has an invalid root signature (HRESULT 0x{result.Value:X8}): {message}");
+                throw new GraphicsException($"{owner} has an invalid root signature (HRESULT 0x{result:X8}): {message}");
             }
 
             ID3D12RootSignature* rootSignature;

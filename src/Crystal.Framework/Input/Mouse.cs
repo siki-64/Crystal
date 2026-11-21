@@ -1,4 +1,4 @@
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Input;
 

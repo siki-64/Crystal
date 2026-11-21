@@ -16,6 +16,7 @@
 # Layout
 - Public API lives in `Crystal`, `Crystal.Graphics`, `Crystal.Input`, `Crystal.Audio` and `Crystal.ImGui`. It never exposes D3D, DXGI or SDL types.
 - D3D12 code is `internal` under `Graphics/D3D12/`; SDL code is `internal` under `Platform/`.
+- Direct3D 12, DXGI, DXC and Win32 come from the generated bindings in `Interop/Generated/`. Never edit them or declare those APIs by hand: add the name or header to `tools/Crystal.Interop.Generator` and run `Regenerate.ps1`. Only function-like macros go in `Interop/HeaderMacros.cs`.
 - SDL3 is bound by hand with `[LibraryImport]` in `Platform/Sdl.cs`. Check new constants and struct layouts against the SDL headers of the pinned version.
 - Flat global names use the `CRYSTAL_` prefix: environment variables, debug object names, log tags.
 

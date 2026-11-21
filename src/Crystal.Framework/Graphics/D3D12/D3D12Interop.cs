@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
-using static TerraFX.Interop.Windows.Windows;
+using Crystal.Interop;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics.D3D12;
 
@@ -9,9 +8,9 @@ internal static unsafe class D3D12Interop
 {
     public static Guid* AddressOf(in Guid guid) => (Guid*)Unsafe.AsPointer(ref Unsafe.AsRef(in guid));
 
-    public static void ThrowOnFailure(HRESULT result, string operation)
+    public static void ThrowOnFailure(int result, string operation)
     {
-        if (FAILED(result)) throw new GraphicsException($"{operation} failed with HRESULT 0x{result.Value:X8}.");
+        if (FAILED(result)) throw new GraphicsException($"{operation} failed with HRESULT 0x{result:X8}.");
     }
 
     public static void Release<T>(ref T* pointer) where T : unmanaged, IUnknown.Interface

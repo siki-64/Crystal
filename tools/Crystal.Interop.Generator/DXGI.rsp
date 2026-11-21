@@ -1,0 +1,15 @@
+--method-class-name
+DXGI
+--library-path
+dxgi
+--file
+dxgi1_6.h
+--traverse
+dxgi.h
+dxgi1_2.h
+dxgi1_3.h
+dxgi1_4.h
+dxgi1_5.h
+dxgi1_6.h
+dxgitype.h
+dxgicommon.h

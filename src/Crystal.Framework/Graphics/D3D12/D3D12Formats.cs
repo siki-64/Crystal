@@ -1,5 +1,5 @@
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.DXGI_FORMAT;
+using Crystal.Interop;
+using static Crystal.Interop.DXGI_FORMAT;
 
 namespace Crystal.Graphics.D3D12;
 
