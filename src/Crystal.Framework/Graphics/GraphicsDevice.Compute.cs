@@ -3,12 +3,13 @@ using TerraFX.Interop.DirectX;
 using static TerraFX.Interop.DirectX.D3D12_BARRIER_ACCESS;
 using static TerraFX.Interop.DirectX.D3D12_BARRIER_LAYOUT;
 using static TerraFX.Interop.DirectX.D3D12_BARRIER_SYNC;
+using static TerraFX.Interop.DirectX.D3D12;
 
 namespace Crystal.Graphics;
 
 public sealed unsafe partial class GraphicsDevice
 {
-    public const int MaximumThreadGroupCount = 65535;
+    public const int MaximumThreadGroupCount = (int)D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
 
     private const int IndirectArgumentAlignment = 4;
 

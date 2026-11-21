@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="../Crystal.Framework/Graphics/D3D12/D3D12BindingLimits.cs" Link="D3D12BindingLimits.cs" />
     <Compile Include="../Crystal.Framework/Graphics/D3D12/D3D12ShaderLibraryFile.cs" Link="D3D12ShaderLibraryFile.cs" />
   </ItemGroup>
 

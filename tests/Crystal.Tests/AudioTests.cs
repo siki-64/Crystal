@@ -273,8 +273,7 @@ public sealed class AudioTests
             writer.Write((ushort)22);
             writer.Write(bitsPerSample);
             writer.Write(0);
-            writer.Write(extensibleSubFormat);
-            writer.Write(new byte[14]);
+            writer.Write(new Guid(extensibleSubFormat, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71).ToByteArray());
         }
         if (leadingChunkSize > 0)
         {

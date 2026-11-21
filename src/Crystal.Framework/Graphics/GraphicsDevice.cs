@@ -14,14 +14,14 @@ using static TerraFX.Interop.DirectX.D3D12_HEAP_TYPE;
 using static TerraFX.Interop.DirectX.D3D12_RESOURCE_DIMENSION;
 using static TerraFX.Interop.DirectX.D3D12_TEXTURE_LAYOUT;
 using static TerraFX.Interop.Windows.Windows;
+using static TerraFX.Interop.DirectX.D3D12;
 
 namespace Crystal.Graphics;
 
 public sealed unsafe partial class GraphicsDevice : IDisposable
 {
-    public const int MaximumRenderTargets = 8;
+    public const int MaximumRenderTargets = (int)D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
-    private const int ConstantBufferAlignment = 256;
     private const int TransientDataAlignment = 16;
 
     private readonly D3D12Device _device;
@@ -832,7 +832,7 @@ public sealed unsafe partial class GraphicsDevice : IDisposable
                 if (constantBuffer.IsDirty || constantBuffer.UploadedFrame != _frameNumber)
                 {
                     var data = constantBuffer.Data;
-                    var destination = state.UploadRing.Allocate(data.Length, ConstantBufferAlignment, out var uploadedAddress);
+                    var destination = state.UploadRing.Allocate(data.Length, (int)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT, out var uploadedAddress);
                     data.AsSpan().CopyTo(new Span<byte>(destination, data.Length));
                     constantBuffer.UploadedAddress = uploadedAddress;
                     constantBuffer.UploadedFrame = _frameNumber;
@@ -859,8 +859,8 @@ public sealed unsafe partial class GraphicsDevice : IDisposable
         var resources = program.Info.Resources;
         var resourceValues = program.ValuesFor(state).Resources;
         var usesDescriptorIndices = program.UsesDescriptorIndices;
-        var firstStageSlots = stackalloc uint[D3D12RootSignatures.ComputeDescriptorSlots];
-        var pixelSlots = stackalloc uint[D3D12RootSignatures.PixelDescriptorSlots];
+        var firstStageSlots = stackalloc uint[D3D12BindingLimits.ComputeDescriptorSlots];
+        var pixelSlots = stackalloc uint[D3D12BindingLimits.PixelDescriptorSlots];
         var rootParameter = (uint)program.ConstantBufferSlots.Length;
         for (var index = 0; index < resources.Length; index++, rootParameter++)
         {

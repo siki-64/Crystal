@@ -1,16 +1,19 @@
+using static TerraFX.Interop.DirectX.D3D12_CULL_MODE;
+using static TerraFX.Interop.DirectX.D3D12_FILL_MODE;
+
 namespace Crystal.Graphics;
 
 public enum FillMode
 {
-    Wireframe = 2,
-    Solid,
+    Wireframe = (int)D3D12_FILL_MODE_WIREFRAME,
+    Solid = (int)D3D12_FILL_MODE_SOLID,
 }
 
 public enum CullMode
 {
-    None = 1,
-    Front,
-    Back,
+    None = (int)D3D12_CULL_MODE_NONE,
+    Front = (int)D3D12_CULL_MODE_FRONT,
+    Back = (int)D3D12_CULL_MODE_BACK,
 }
 
 public sealed record RasterizerState

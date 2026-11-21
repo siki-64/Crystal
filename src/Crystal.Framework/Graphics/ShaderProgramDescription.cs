@@ -1,3 +1,6 @@
+using static TerraFX.Interop.DirectX.D3D_SHADER_VARIABLE_CLASS;
+using static TerraFX.Interop.DirectX.D3D_SRV_DIMENSION;
+
 namespace Crystal.Graphics;
 
 [Flags]
@@ -22,26 +25,26 @@ public enum ShaderResourceKind
 
 public enum ShaderResourceDimension
 {
-    None = 0,
-    Buffer = 1,
-    Texture1D = 2,
-    Texture1DArray = 3,
-    Texture2D = 4,
-    Texture2DArray = 5,
-    Texture2DMS = 6,
-    Texture2DMSArray = 7,
-    Texture3D = 8,
-    TextureCube = 9,
-    TextureCubeArray = 10,
+    None = (int)D3D_SRV_DIMENSION_UNKNOWN,
+    Buffer = (int)D3D_SRV_DIMENSION_BUFFER,
+    Texture1D = (int)D3D_SRV_DIMENSION_TEXTURE1D,
+    Texture1DArray = (int)D3D_SRV_DIMENSION_TEXTURE1DARRAY,
+    Texture2D = (int)D3D_SRV_DIMENSION_TEXTURE2D,
+    Texture2DArray = (int)D3D_SRV_DIMENSION_TEXTURE2DARRAY,
+    Texture2DMS = (int)D3D_SRV_DIMENSION_TEXTURE2DMS,
+    Texture2DMSArray = (int)D3D_SRV_DIMENSION_TEXTURE2DMSARRAY,
+    Texture3D = (int)D3D_SRV_DIMENSION_TEXTURE3D,
+    TextureCube = (int)D3D_SRV_DIMENSION_TEXTURECUBE,
+    TextureCubeArray = (int)D3D_SRV_DIMENSION_TEXTURECUBEARRAY,
 }
 
 public enum ShaderVariableClass
 {
-    Scalar,
-    Vector,
-    MatrixRows,
-    MatrixColumns,
-    Struct,
+    Scalar = (int)D3D_SVC_SCALAR,
+    Vector = (int)D3D_SVC_VECTOR,
+    MatrixRows = (int)D3D_SVC_MATRIX_ROWS,
+    MatrixColumns = (int)D3D_SVC_MATRIX_COLUMNS,
+    Struct = (int)D3D_SVC_STRUCT,
 }
 
 public sealed record ShaderProgramDescription

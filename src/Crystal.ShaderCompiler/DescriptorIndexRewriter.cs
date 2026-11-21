@@ -1,17 +1,15 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using Crystal.Graphics.D3D12;
+using static Crystal.Graphics.D3D12.D3D12BindingLimits;
 
 namespace Crystal.ShaderCompiler;
 
 internal static class DescriptorIndexRewriter
 {
-    public const int VertexSlotLimit = 16;
-    public const int PixelSlotLimit = 32;
-    public const int ComputeSlotLimit = 32;
     public const string IndexBlockRegister = "b0, space1";
 
-    public static int SlotLimit(ShaderStage stage) => stage switch { ShaderStage.Vertex => VertexSlotLimit, ShaderStage.Pixel => PixelSlotLimit, _ => ComputeSlotLimit };
+    public static int SlotLimit(ShaderStage stage) => stage switch { ShaderStage.Vertex => VertexDescriptorSlots, ShaderStage.Pixel => PixelDescriptorSlots, _ => ComputeDescriptorSlots };
 
     public static string? Rewrite(string preprocessedSource, IReadOnlyList<D3D12ShaderResourceInfo> resources, ShaderStage stage, List<string> problems)
     {

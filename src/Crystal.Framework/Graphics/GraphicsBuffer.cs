@@ -9,14 +9,14 @@ using static TerraFX.Interop.DirectX.D3D12_RESOURCE_FLAGS;
 using static TerraFX.Interop.DirectX.D3D12_SRV_DIMENSION;
 using static TerraFX.Interop.DirectX.D3D12_UAV_DIMENSION;
 using static TerraFX.Interop.DirectX.DXGI_FORMAT;
+using static TerraFX.Interop.DirectX.D3D12;
 
 namespace Crystal.Graphics;
 
 public sealed unsafe class GraphicsBuffer : GraphicsResource
 {
-    public const int MaximumConstantBufferSize = 65536;
+    public const int MaximumConstantBufferSize = (int)(D3D12_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * D3D12_COMMONSHADER_CONSTANT_BUFFER_COMPONENTS) * sizeof(float);
 
-    private const int ConstantBufferAlignment = 256;
     private const uint NoDescriptor = uint.MaxValue;
 
     public GraphicsBuffer(GraphicsDevice graphicsDevice, in BufferDescription description)
@@ -26,7 +26,7 @@ public sealed unsafe class GraphicsBuffer : GraphicsResource
         Description = description;
 
         var usage = description.Usage;
-        var allocatedSize = (usage & BufferUsage.Constant) != 0 ? AlignUp((ulong)description.Size, ConstantBufferAlignment) : (ulong)description.Size;
+        var allocatedSize = (usage & BufferUsage.Constant) != 0 ? AlignUp((ulong)description.Size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) : (ulong)description.Size;
         var flags = (usage & BufferUsage.UnorderedAccess) != 0 ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE;
         var device = graphicsDevice.Native;
         var pointer = device.CreateCommittedResource(
@@ -50,7 +50,7 @@ public sealed unsafe class GraphicsBuffer : GraphicsResource
             {
                 Format = isRaw ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN,
                 ViewDimension = D3D12_SRV_DIMENSION_BUFFER,
-                Shader4ComponentMapping = D3D12Formats.DefaultComponentMapping,
+                Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
             };
             view.Buffer = new D3D12_BUFFER_SRV
             {

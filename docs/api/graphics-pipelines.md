@@ -50,7 +50,7 @@ Draws throw `InvalidOperationException` when the bound targets don't match `Rend
 | `ShaderProgram Program { get; }` | The program. |
 
 ## PrimitiveType
-`public enum PrimitiveType { TriangleList = 0, TriangleStrip = 1, LineList = 2, LineStrip = 3, PointList = 4 }`
+`public enum PrimitiveType { PointList = 1, LineList = 2, LineStrip = 3, TriangleList = 4, TriangleStrip = 5 }`
 
 ## BlendState
 `public sealed class BlendState : IEquatable<BlendState>`

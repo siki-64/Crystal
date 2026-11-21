@@ -1,12 +1,14 @@
+using static TerraFX.Interop.DirectX.D3D12_MESSAGE_SEVERITY;
+
 namespace Crystal.Graphics;
 
 public enum GraphicsDebugSeverity
 {
-    Corruption,
-    Error,
-    Warning,
-    Info,
-    Message,
+    Corruption = (int)D3D12_MESSAGE_SEVERITY_CORRUPTION,
+    Error = (int)D3D12_MESSAGE_SEVERITY_ERROR,
+    Warning = (int)D3D12_MESSAGE_SEVERITY_WARNING,
+    Info = (int)D3D12_MESSAGE_SEVERITY_INFO,
+    Message = (int)D3D12_MESSAGE_SEVERITY_MESSAGE,
 }
 
 public sealed record GraphicsDebugMessage(GraphicsDebugSeverity Severity, int Id, string Text)

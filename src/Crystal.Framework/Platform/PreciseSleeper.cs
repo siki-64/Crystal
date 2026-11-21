@@ -1,16 +1,15 @@
 using System.Diagnostics;
 using TerraFX.Interop.Windows;
+using static TerraFX.Interop.Windows.CREATE;
 using static TerraFX.Interop.Windows.Windows;
 
 namespace Crystal.Platform;
 
 internal sealed unsafe class PreciseSleeper : IDisposable
 {
-    private const uint CreateWaitableTimerHighResolution = 0x00000002;
-
     private static readonly TimeSpan SpinThreshold = TimeSpan.FromMilliseconds(1);
 
-    private HANDLE _timer = CreateWaitableTimerExW(null, null, CreateWaitableTimerHighResolution, TIMER_ALL_ACCESS);
+    private HANDLE _timer = CreateWaitableTimerExW(null, null, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
 
     public void Sleep(TimeSpan duration) =>
         SleepUntil(Stopwatch.GetTimestamp() + (long)(duration.TotalSeconds * Stopwatch.Frequency));

@@ -2,23 +2,23 @@ using TerraFX.Interop.DirectX;
 using static TerraFX.Interop.DirectX.D3D12_CONSERVATIVE_RASTERIZATION_MODE;
 using static TerraFX.Interop.DirectX.D3D12_DEPTH_WRITE_MASK;
 using static TerraFX.Interop.DirectX.D3D12_LOGIC_OP;
+using static TerraFX.Interop.DirectX.D3D12;
+using static TerraFX.Interop.DirectX.DirectX;
 using static TerraFX.Interop.Windows.Windows;
 
 namespace Crystal.Graphics.D3D12;
 
 internal static unsafe class D3D12States
 {
-    private const int AnisotropicFilterBit = 0x40;
-
     public static D3D12_SAMPLER_DESC ToD3D12(in SamplerDescription description)
     {
-        var reduction = (int)description.Reduction << 7;
+        var reduction = (D3D12_FILTER_REDUCTION_TYPE)description.Reduction;
         var filter = description.MaxAnisotropy > 1
-            ? AnisotropicFilterBit | (1 << 4) | (1 << 2) | 1 | reduction
-            : ((int)description.MinFilter << 4) | ((int)description.MagFilter << 2) | (int)description.MipFilter | reduction;
+            ? D3D12_ENCODE_ANISOTROPIC_FILTER(reduction)
+            : D3D12_ENCODE_BASIC_FILTER((D3D12_FILTER_TYPE)description.MinFilter, (D3D12_FILTER_TYPE)description.MagFilter, (D3D12_FILTER_TYPE)description.MipFilter, reduction);
         var sampler = new D3D12_SAMPLER_DESC
         {
-            Filter = (D3D12_FILTER)filter,
+            Filter = filter,
             AddressU = (D3D12_TEXTURE_ADDRESS_MODE)description.AddressU,
             AddressV = (D3D12_TEXTURE_ADDRESS_MODE)description.AddressV,
             AddressW = (D3D12_TEXTURE_ADDRESS_MODE)description.AddressW,

@@ -1,4 +1,5 @@
 using System.Text;
+using static TerraFX.Interop.DirectX.D3D_SHADER_VARIABLE_CLASS;
 
 namespace Crystal.Graphics.D3D12;
 
@@ -24,11 +25,11 @@ internal enum D3D12ShaderResourceKind : byte
 
 internal enum D3D12ShaderVariableClass : byte
 {
-    Scalar,
-    Vector,
-    MatrixRows,
-    MatrixColumns,
-    Struct,
+    Scalar = (byte)D3D_SVC_SCALAR,
+    Vector = (byte)D3D_SVC_VECTOR,
+    MatrixRows = (byte)D3D_SVC_MATRIX_ROWS,
+    MatrixColumns = (byte)D3D_SVC_MATRIX_COLUMNS,
+    Struct = (byte)D3D_SVC_STRUCT,
 }
 
 internal sealed record D3D12ShaderVariableInfo(string Name, int Offset, int Size, D3D12ShaderVariableClass Class, int Rows, int Columns, int Elements);
@@ -66,7 +67,7 @@ internal sealed record D3D12ShaderLibraryFile(byte[][] Shaders, D3D12ShaderProgr
     public const string Extension = ".crystalshader";
 
     private static ReadOnlySpan<byte> Magic => "CRYSSHDR"u8;
-    private const int Version = 3;
+    private const int Version = 4;
 
     public static D3D12ShaderLibraryFile Read(Stream stream)
     {

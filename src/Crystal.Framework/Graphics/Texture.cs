@@ -12,6 +12,7 @@ using static TerraFX.Interop.DirectX.D3D12_RTV_DIMENSION;
 using static TerraFX.Interop.DirectX.D3D12_SRV_DIMENSION;
 using static TerraFX.Interop.DirectX.D3D12_TEXTURE_LAYOUT;
 using static TerraFX.Interop.DirectX.D3D12_UAV_DIMENSION;
+using static TerraFX.Interop.DirectX.D3D12;
 
 namespace Crystal.Graphics;
 
@@ -84,7 +85,7 @@ public abstract unsafe class Texture : GraphicsResource
         if ((usage & TextureUsage.ShaderResource) != 0)
         {
             ShaderResourceViewIndex = device.ShaderResourceHeap.Allocate();
-            var view = new D3D12_SHADER_RESOURCE_VIEW_DESC { Format = FormatInfo.ViewFormat, Shader4ComponentMapping = D3D12Formats.DefaultComponentMapping };
+            var view = new D3D12_SHADER_RESOURCE_VIEW_DESC { Format = FormatInfo.ViewFormat, Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING };
             if (isCube && arrayLayers > 6)
             {
                 view.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
@@ -242,7 +243,7 @@ public abstract unsafe class Texture : GraphicsResource
         if ((Usage & TextureUsage.ShaderResource) != 0)
         {
             shaderResourceViewIndex = device.ShaderResourceHeap.Allocate();
-            var view = new D3D12_SHADER_RESOURCE_VIEW_DESC { Format = FormatInfo.ViewFormat, Shader4ComponentMapping = D3D12Formats.DefaultComponentMapping };
+            var view = new D3D12_SHADER_RESOURCE_VIEW_DESC { Format = FormatInfo.ViewFormat, Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING };
             if (_isCube && ArrayLayers > 6)
             {
                 view.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;

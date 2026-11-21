@@ -1,12 +1,12 @@
 using System.Runtime.InteropServices;
 using Crystal.Graphics.D3D12;
 using TerraFX.Interop.DirectX;
+using static TerraFX.Interop.DirectX.D3D12;
 
 namespace Crystal.Graphics;
 
 public sealed class ShaderConstantBuffer
 {
-    private const int ConstantBufferAlignment = 256;
 
     internal ShaderConstantBuffer(ShaderProgram program, D3D12ConstantBufferInfo info, int slot)
     {
@@ -43,8 +43,8 @@ public sealed class ShaderConstantBuffer
         if (buffer != null)
         {
             if ((buffer.Usage & BufferUsage.Constant) == 0) throw new ArgumentException($"Buffer '{buffer.Name}' was not created with BufferUsage.Constant.", nameof(buffer));
-            if (offsetInBytes < 0 || offsetInBytes % ConstantBufferAlignment != 0)
-                throw new ArgumentOutOfRangeException(nameof(offsetInBytes), $"Constant buffer offsets must be multiples of {ConstantBufferAlignment} bytes.");
+            if (offsetInBytes < 0 || offsetInBytes % (int)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT != 0)
+                throw new ArgumentOutOfRangeException(nameof(offsetInBytes), $"Constant buffer offsets must be multiples of {D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT} bytes.");
             if ((ulong)offsetInBytes + (ulong)Size > buffer.AllocatedSize)
                 throw new ArgumentException($"Constant buffer '{Name}' needs {Size} bytes from offset {offsetInBytes}, but buffer '{buffer.Name}' is {buffer.Size} bytes.", nameof(buffer));
         }

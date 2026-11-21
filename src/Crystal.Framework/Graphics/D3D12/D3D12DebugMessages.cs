@@ -60,16 +60,8 @@ internal sealed unsafe class D3D12DebugMessages : IDisposable
     private static void OnMessage(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, sbyte* description, void* context)
     {
         if (GCHandle.FromIntPtr((nint)context).Target is not D3D12DebugMessages messages) return;
-        var message = new GraphicsDebugMessage(ToSeverity(severity), (int)id, Marshal.PtrToStringUTF8((nint)description) ?? string.Empty);
+        var message = new GraphicsDebugMessage((GraphicsDebugSeverity)severity, (int)id, Marshal.PtrToStringUTF8((nint)description) ?? string.Empty);
         lock (messages._lock) messages._pending.Add(message);
     }
 
-    private static GraphicsDebugSeverity ToSeverity(D3D12_MESSAGE_SEVERITY severity) => severity switch
-    {
-        D3D12_MESSAGE_SEVERITY_CORRUPTION => GraphicsDebugSeverity.Corruption,
-        D3D12_MESSAGE_SEVERITY_ERROR => GraphicsDebugSeverity.Error,
-        D3D12_MESSAGE_SEVERITY_WARNING => GraphicsDebugSeverity.Warning,
-        D3D12_MESSAGE_SEVERITY_INFO => GraphicsDebugSeverity.Info,
-        _ => GraphicsDebugSeverity.Message,
-    };
 }

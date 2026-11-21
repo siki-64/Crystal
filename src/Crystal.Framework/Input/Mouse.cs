@@ -1,8 +1,10 @@
+using static TerraFX.Interop.Windows.Windows;
+
 namespace Crystal.Input;
 
 public static class Mouse
 {
-    public const int WheelDelta = 120;
+    public const int WheelDelta = (int)WHEEL_DELTA;
 
     private static MouseState _state;
     private static double _scrollWheel;

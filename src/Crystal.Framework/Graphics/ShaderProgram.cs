@@ -78,8 +78,8 @@ public sealed unsafe class ShaderProgram
                 _ => (buffer.Visibility & (D3D12ShaderVisibility.Vertex | D3D12ShaderVisibility.Pixel)) switch
                 {
                     D3D12ShaderVisibility.Vertex => (buffer.Register, -1),
-                    D3D12ShaderVisibility.Pixel => (D3D12RootSignatures.GraphicsConstantBufferRegisters + buffer.Register, -1),
-                    _ => (buffer.Register, D3D12RootSignatures.GraphicsConstantBufferRegisters + buffer.Register),
+                    D3D12ShaderVisibility.Pixel => (D3D12BindingLimits.GraphicsConstantBufferRegisters + buffer.Register, -1),
+                    _ => (buffer.Register, D3D12BindingLimits.GraphicsConstantBufferRegisters + buffer.Register),
                 },
             };
         }

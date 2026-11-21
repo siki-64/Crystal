@@ -1,5 +1,6 @@
 using System.Text;
 using TerraFX.Interop.DirectX;
+using static Crystal.Graphics.D3D12.D3D12BindingLimits;
 using static Crystal.Graphics.D3D12.D3D12Interop;
 using static TerraFX.Interop.DirectX.D3D_ROOT_SIGNATURE_VERSION;
 using static TerraFX.Interop.DirectX.D3D12_DESCRIPTOR_RANGE_FLAGS;
@@ -15,11 +16,6 @@ namespace Crystal.Graphics.D3D12;
 
 internal static unsafe class D3D12RootSignatures
 {
-    public const int GraphicsConstantBufferRegisters = 4;
-    public const int ComputeConstantBufferRegisters = 8;
-    public const int VertexDescriptorSlots = 16;
-    public const int PixelDescriptorSlots = 32;
-    public const int ComputeDescriptorSlots = 32;
     public const uint GraphicsVertexDescriptorIndexParameter = 2 * GraphicsConstantBufferRegisters;
     public const uint GraphicsPixelDescriptorIndexParameter = GraphicsVertexDescriptorIndexParameter + 1;
     public const uint ComputeDescriptorIndexParameter = ComputeConstantBufferRegisters;
