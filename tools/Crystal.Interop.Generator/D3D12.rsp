@@ -1,0 +1,14 @@
+--generate
+helper-types
+--method-class-name
+D3D12
+--library-path
+d3d12
+--file
+D3D12Entry.h
+--traverse
+d3d12.h
+d3d12sdklayers.h
+d3d12shader.h
+d3dcommon.h
+dxgiformat.h

@@ -1,6 +1,6 @@
 using Crystal.Input;
-using TerraFX.Interop.Windows;
-using static TerraFX.Interop.Windows.VK;
+using Crystal.Interop;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Platform;
 
@@ -29,7 +29,7 @@ internal static unsafe class HostWindowInput
         foreach (var (key, virtualKey) in VirtualKeyByKey) Keyboard.SetKey(key, IsDown(virtualKey));
 
         POINT cursor;
-        if (!Windows.GetCursorPos(&cursor) || !Windows.ScreenToClient((HWND)window.Handle, &cursor)) return;
+        if (Windows.GetCursorPos(&cursor) == FALSE || Windows.ScreenToClient((HWND__*)window.Handle, &cursor) == FALSE) return;
         if (_hasCursorPosition) Mouse.Move(cursor.x - Mouse.State.X, cursor.y - Mouse.State.Y);
         _hasCursorPosition = true;
         Mouse.State = Mouse.State with

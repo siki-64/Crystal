@@ -5,9 +5,6 @@ namespace Crystal.ShaderCompiler;
 
 internal static class ShaderLibraryBuilder
 {
-    public const int GraphicsConstantBufferRegisterLimit = 4;
-    public const int ComputeConstantBufferRegisterLimit = 8;
-
     public static D3D12ShaderLibraryFile? Build(ShaderFile file, CompilerOptions options, DxcShaderCompiler compiler, List<ShaderDiagnostic> diagnostics) =>
         Build(file.SourcePath, File.ReadAllBytes(file.SourcePath), options, compiler, diagnostics);
 
@@ -72,7 +69,7 @@ internal static class ShaderLibraryBuilder
         var errors = new List<string>();
         var stages = new[] { vertexShader, pixelShader, computeShader }.Where(shader => shader >= 0).Select(shader => (Kind: stagesOfShaders[shader], Reflection: reflections[shader])).ToArray();
         foreach (var stage in stages) errors.AddRange(stage.Reflection.Problems);
-        var constantBufferRegisterLimit = computeShader >= 0 ? ComputeConstantBufferRegisterLimit : GraphicsConstantBufferRegisterLimit;
+        var constantBufferRegisterLimit = computeShader >= 0 ? D3D12BindingLimits.ComputeConstantBufferRegisters : D3D12BindingLimits.GraphicsConstantBufferRegisters;
 
         var constantBuffers = new Dictionary<(int Register, int Space), D3D12ConstantBufferInfo>();
         var resources = new Dictionary<(char RegisterType, int Register, int Space), D3D12ShaderResourceInfo>();

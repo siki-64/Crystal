@@ -1,46 +1,50 @@
+using static Crystal.Interop.D3D12_BLEND;
+using static Crystal.Interop.D3D12_BLEND_OP;
+using static Crystal.Interop.D3D12_COLOR_WRITE_ENABLE;
+
 namespace Crystal.Graphics;
 
 public enum Blend
 {
-    Zero = 1,
-    One,
-    SourceColor,
-    InverseSourceColor,
-    SourceAlpha,
-    InverseSourceAlpha,
-    DestinationAlpha,
-    InverseDestinationAlpha,
-    DestinationColor,
-    InverseDestinationColor,
-    SourceAlphaSaturate,
-    BlendFactor = 14,
-    InverseBlendFactor,
-    Source1Color,
-    InverseSource1Color,
-    Source1Alpha,
-    InverseSource1Alpha,
-    AlphaFactor,
-    InverseAlphaFactor,
+    Zero = (int)D3D12_BLEND_ZERO,
+    One = (int)D3D12_BLEND_ONE,
+    SourceColor = (int)D3D12_BLEND_SRC_COLOR,
+    InverseSourceColor = (int)D3D12_BLEND_INV_SRC_COLOR,
+    SourceAlpha = (int)D3D12_BLEND_SRC_ALPHA,
+    InverseSourceAlpha = (int)D3D12_BLEND_INV_SRC_ALPHA,
+    DestinationAlpha = (int)D3D12_BLEND_DEST_ALPHA,
+    InverseDestinationAlpha = (int)D3D12_BLEND_INV_DEST_ALPHA,
+    DestinationColor = (int)D3D12_BLEND_DEST_COLOR,
+    InverseDestinationColor = (int)D3D12_BLEND_INV_DEST_COLOR,
+    SourceAlphaSaturate = (int)D3D12_BLEND_SRC_ALPHA_SAT,
+    BlendFactor = (int)D3D12_BLEND_BLEND_FACTOR,
+    InverseBlendFactor = (int)D3D12_BLEND_INV_BLEND_FACTOR,
+    Source1Color = (int)D3D12_BLEND_SRC1_COLOR,
+    InverseSource1Color = (int)D3D12_BLEND_INV_SRC1_COLOR,
+    Source1Alpha = (int)D3D12_BLEND_SRC1_ALPHA,
+    InverseSource1Alpha = (int)D3D12_BLEND_INV_SRC1_ALPHA,
+    AlphaFactor = (int)D3D12_BLEND_ALPHA_FACTOR,
+    InverseAlphaFactor = (int)D3D12_BLEND_INV_ALPHA_FACTOR,
 }
 
 public enum BlendOperation
 {
-    Add = 1,
-    Subtract,
-    ReverseSubtract,
-    Min,
-    Max,
+    Add = (int)D3D12_BLEND_OP_ADD,
+    Subtract = (int)D3D12_BLEND_OP_SUBTRACT,
+    ReverseSubtract = (int)D3D12_BLEND_OP_REV_SUBTRACT,
+    Min = (int)D3D12_BLEND_OP_MIN,
+    Max = (int)D3D12_BLEND_OP_MAX,
 }
 
 [Flags]
 public enum ColorWriteChannels
 {
     None = 0,
-    Red = 1,
-    Green = 2,
-    Blue = 4,
-    Alpha = 8,
-    All = Red | Green | Blue | Alpha,
+    Red = (int)D3D12_COLOR_WRITE_ENABLE_RED,
+    Green = (int)D3D12_COLOR_WRITE_ENABLE_GREEN,
+    Blue = (int)D3D12_COLOR_WRITE_ENABLE_BLUE,
+    Alpha = (int)D3D12_COLOR_WRITE_ENABLE_ALPHA,
+    All = (int)D3D12_COLOR_WRITE_ENABLE_ALL,
 }
 
 public readonly record struct RenderTargetBlendDescription

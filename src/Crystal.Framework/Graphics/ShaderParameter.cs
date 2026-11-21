@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Crystal.Graphics.D3D12;
+using static Crystal.Interop.D3D12;
 
 namespace Crystal.Graphics;
 
@@ -16,7 +17,7 @@ public enum ShaderParameterKind
 
 public sealed class ShaderParameter
 {
-    private const int RegisterSize = 16;
+    private const int RegisterSize = (int)D3D12_COMMONSHADER_CONSTANT_BUFFER_COMPONENTS * sizeof(float);
 
     private readonly ShaderValueBinding[] _bindings = [];
     private readonly D3D12ShaderVariableInfo? _variable;

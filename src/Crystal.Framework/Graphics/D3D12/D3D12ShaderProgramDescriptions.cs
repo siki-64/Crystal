@@ -1,9 +1,9 @@
+using static Crystal.Interop.D3D12;
+
 namespace Crystal.Graphics.D3D12;
 
 internal static class D3D12ShaderProgramDescriptions
 {
-    private const int MaxConstantBufferSize = 65536;
-    private const int MaxRootSignatureDwords = 64;
     private const int ConstantBufferRootDwords = 2;
     private const int ResourceRootDwords = 1;
 
@@ -48,8 +48,8 @@ internal static class D3D12ShaderProgramDescriptions
             var buffer = description.ConstantBuffers[index];
             if (string.IsNullOrEmpty(buffer.Name)) throw Invalid(name, $"has constant buffer {index} without a name.");
             if (!bufferNames.Add(buffer.Name)) throw Invalid(name, $"has two constant buffers named '{buffer.Name}'.");
-            if (buffer.Size < 1 || buffer.Size > MaxConstantBufferSize)
-                throw Invalid(name, $"has constant buffer '{buffer.Name}' of {buffer.Size} bytes; sizes run from 1 to {MaxConstantBufferSize}.");
+            if (buffer.Size < 1 || buffer.Size > GraphicsBuffer.MaximumConstantBufferSize)
+                throw Invalid(name, $"has constant buffer '{buffer.Name}' of {buffer.Size} bytes; sizes run from 1 to {GraphicsBuffer.MaximumConstantBufferSize}.");
             CheckStages(name, $"constant buffer '{buffer.Name}'", buffer.Stages, stages);
             if (description.UsesDescriptorIndices) CheckDescriptorIndexedConstantBuffer(name, buffer, hasCompute);
             Occupy(occupiedRegisters, name, 'b', buffer.Space, buffer.Register, buffer.Stages, $"constant buffer '{buffer.Name}'");
@@ -78,8 +78,8 @@ internal static class D3D12ShaderProgramDescriptions
         }
 
         var rootDwords = constantBuffers.Length * ConstantBufferRootDwords + resources.Length * ResourceRootDwords;
-        if (!description.UsesDescriptorIndices && rootDwords > MaxRootSignatureDwords)
-            throw Invalid(name, $"needs {rootDwords} root signature DWORDs ({ConstantBufferRootDwords} per constant buffer, {ResourceRootDwords} per resource); the limit is {MaxRootSignatureDwords}.");
+        if (!description.UsesDescriptorIndices && rootDwords > D3D12_MAX_ROOT_COST)
+            throw Invalid(name, $"needs {rootDwords} root signature DWORDs ({ConstantBufferRootDwords} per constant buffer, {ResourceRootDwords} per resource); the limit is {D3D12_MAX_ROOT_COST}.");
 
         var vertexInputs = new D3D12VertexInputInfo[description.VertexInputs.Count];
         for (var index = 0; index < vertexInputs.Length; index++)
@@ -118,16 +118,16 @@ internal static class D3D12ShaderProgramDescriptions
 
     private static void CheckDescriptorIndexedConstantBuffer(string program, ShaderConstantBufferDescription buffer, bool isCompute)
     {
-        var registerLimit = isCompute ? D3D12RootSignatures.ComputeConstantBufferRegisters : D3D12RootSignatures.GraphicsConstantBufferRegisters;
+        var registerLimit = isCompute ? D3D12BindingLimits.ComputeConstantBufferRegisters : D3D12BindingLimits.GraphicsConstantBufferRegisters;
         if (buffer.Space != 0 || buffer.Register < 0 || buffer.Register >= registerLimit)
             throw Invalid(program, $"has constant buffer '{buffer.Name}' at b{buffer.Register}, space {buffer.Space}; with descriptor indices constant buffers must be in space 0 below b{registerLimit}.");
     }
 
     private static void CheckDescriptorSlots(string program, ShaderResourceDescription resource, Dictionary<(ShaderStages Stage, int Slot), string> occupiedSlots)
     {
-        CheckDescriptorSlot(program, resource, ShaderStages.Vertex, resource.VertexDescriptorSlot, D3D12RootSignatures.VertexDescriptorSlots, occupiedSlots);
-        CheckDescriptorSlot(program, resource, ShaderStages.Pixel, resource.PixelDescriptorSlot, D3D12RootSignatures.PixelDescriptorSlots, occupiedSlots);
-        CheckDescriptorSlot(program, resource, ShaderStages.Compute, resource.ComputeDescriptorSlot, D3D12RootSignatures.ComputeDescriptorSlots, occupiedSlots);
+        CheckDescriptorSlot(program, resource, ShaderStages.Vertex, resource.VertexDescriptorSlot, D3D12BindingLimits.VertexDescriptorSlots, occupiedSlots);
+        CheckDescriptorSlot(program, resource, ShaderStages.Pixel, resource.PixelDescriptorSlot, D3D12BindingLimits.PixelDescriptorSlots, occupiedSlots);
+        CheckDescriptorSlot(program, resource, ShaderStages.Compute, resource.ComputeDescriptorSlot, D3D12BindingLimits.ComputeDescriptorSlots, occupiedSlots);
     }
 
     private static void CheckDescriptorSlot(

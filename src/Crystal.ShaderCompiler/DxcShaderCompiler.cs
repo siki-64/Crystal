@@ -2,15 +2,15 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
-using static TerraFX.Interop.DirectX.D3D_NAME;
-using static TerraFX.Interop.DirectX.D3D_SHADER_INPUT_TYPE;
-using static TerraFX.Interop.DirectX.D3D_SHADER_VARIABLE_CLASS;
-using static TerraFX.Interop.DirectX.D3D_SRV_DIMENSION;
-using static TerraFX.Interop.DirectX.DirectX;
-using static TerraFX.Interop.DirectX.DXC_OUT_KIND;
-using static TerraFX.Interop.Windows.Windows;
+using Crystal.Interop;
+using static Crystal.Interop.D3D_NAME;
+using static Crystal.Interop.D3D_SHADER_INPUT_TYPE;
+using static Crystal.Interop.D3D_SHADER_VARIABLE_CLASS;
+using static Crystal.Interop.D3D_SRV_DIMENSION;
+using static Crystal.Interop.D3D12;
+using static Crystal.Interop.Dxc;
+using static Crystal.Interop.DXC_OUT_KIND;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.ShaderCompiler;
 
@@ -75,7 +75,7 @@ internal sealed unsafe partial class DxcShaderCompiler : IDisposable
         try
         {
             AddDiagnostics(result, sourcePath, entryPoint, diagnostics);
-            HRESULT status;
+            int status;
             ThrowOnFailure(result->GetStatus(&status), "IDxcResult::GetStatus");
             if (FAILED(status)) return null;
 
@@ -98,7 +98,7 @@ internal sealed unsafe partial class DxcShaderCompiler : IDisposable
         try
         {
             AddDiagnostics(result, sourcePath, "preprocessor", diagnostics);
-            HRESULT status;
+            int status;
             ThrowOnFailure(result->GetStatus(&status), "IDxcResult::GetStatus");
             if (FAILED(status)) return null;
             return Encoding.UTF8.GetString(ReadOutput(result, DXC_OUT_HLSL)).TrimEnd('\0');
@@ -321,9 +321,9 @@ internal sealed unsafe partial class DxcShaderCompiler : IDisposable
         return new D3D12ConstantBufferInfo(name, (int)binding.BindPoint, (int)binding.Space, (int)bufferDescription.Size, visibility, [.. variables]);
     }
 
-    private static void ThrowOnFailure(HRESULT result, string operation)
+    private static void ThrowOnFailure(int result, string operation)
     {
-        if (FAILED(result)) throw new InvalidOperationException($"{operation} failed with HRESULT 0x{result.Value:X8}.");
+        if (FAILED(result)) throw new InvalidOperationException($"{operation} failed with HRESULT 0x{result:X8}.");
     }
 
     private static void Release<T>(ref T* pointer) where T : unmanaged, IUnknown.Interface

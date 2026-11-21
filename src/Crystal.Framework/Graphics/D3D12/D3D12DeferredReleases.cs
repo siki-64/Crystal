@@ -1,4 +1,4 @@
-using TerraFX.Interop.Windows;
+using Crystal.Interop;
 
 namespace Crystal.Graphics.D3D12;
 

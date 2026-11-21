@@ -1,19 +1,16 @@
 using System.Buffers.Binary;
+using System.Runtime.InteropServices;
+using Crystal.Interop;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Audio;
 
-internal static class WavFile
+internal static unsafe class WavFile
 {
     private const uint RiffTag = 0x46464952;
     private const uint WaveTag = 0x45564157;
     private const uint FormatTag = 0x20746D66;
     private const uint DataTag = 0x61746164;
-
-    private const ushort IntegerEncoding = 1;
-    private const ushort FloatEncoding = 3;
-    private const ushort ExtensibleEncoding = 0xFFFE;
-    private const int ExtensibleFormatSize = 40;
-    private const int ExtensibleSubFormatOffset = 24;
 
     public static SoundEffect Read(Stream stream)
     {
@@ -41,15 +38,16 @@ internal static class WavFile
             var body = file[(offset + 8)..];
             if (tag == FormatTag)
             {
-                if (size < 16 || body.Length < size) throw new InvalidDataException("The WAVE format chunk is truncated.");
-                encoding = BinaryPrimitives.ReadUInt16LittleEndian(body);
-                channelCount = BinaryPrimitives.ReadUInt16LittleEndian(body[2..]);
-                sampleRate = (int)ReadUInt32(body[4..]);
-                bitsPerSample = BinaryPrimitives.ReadUInt16LittleEndian(body[14..]);
-                if (encoding == ExtensibleEncoding)
+                if (size < sizeof(PCMWAVEFORMAT) || body.Length < size) throw new InvalidDataException("The WAVE format chunk is truncated.");
+                var format = MemoryMarshal.Read<PCMWAVEFORMAT>(body);
+                encoding = format.wf.wFormatTag;
+                channelCount = format.wf.nChannels;
+                sampleRate = (int)format.wf.nSamplesPerSec;
+                bitsPerSample = format.wBitsPerSample;
+                if (encoding == WAVE_FORMAT_EXTENSIBLE)
                 {
-                    if (size < ExtensibleFormatSize) throw new InvalidDataException("The WAVE extensible format chunk is truncated.");
-                    encoding = BinaryPrimitives.ReadUInt16LittleEndian(body[ExtensibleSubFormatOffset..]);
+                    if (size < sizeof(WAVEFORMATEXTENSIBLE)) throw new InvalidDataException("The WAVE extensible format chunk is truncated.");
+                    encoding = EncodingOf(MemoryMarshal.Read<WAVEFORMATEXTENSIBLE>(body).SubFormat);
                 }
                 hasFormat = true;
             }
@@ -73,8 +71,8 @@ internal static class WavFile
         if (channelCount is not (1 or 2)) throw new NotSupportedException($"WAVE files with {channelCount} channels are not supported; use mono or stereo.");
         var isSupported = encoding switch
         {
-            IntegerEncoding => bitsPerSample is 8 or 16 or 24 or 32,
-            FloatEncoding => bitsPerSample is 32 or 64,
+            WAVE_FORMAT_PCM => bitsPerSample is 8 or 16 or 24 or 32,
+            WAVE_FORMAT_IEEE_FLOAT => bitsPerSample is 32 or 64,
             _ => false,
         };
         if (!isSupported) throw new NotSupportedException($"WAVE encoding {encoding} with {bitsPerSample} bits per sample is not supported.");
@@ -88,15 +86,22 @@ internal static class WavFile
             var sample = data[(index * bytesPerSample)..];
             samples[index] = (encoding, bitsPerSample) switch
             {
-                (IntegerEncoding, 8) => (sample[0] - 128) / 128f,
-                (IntegerEncoding, 16) => BinaryPrimitives.ReadInt16LittleEndian(sample) / 32768f,
-                (IntegerEncoding, 24) => ((sample[0] << 8 | sample[1] << 16 | sample[2] << 24) >> 8) / 8388608f,
-                (IntegerEncoding, _) => BinaryPrimitives.ReadInt32LittleEndian(sample) / 2147483648f,
+                (WAVE_FORMAT_PCM, 8) => (sample[0] - 128) / 128f,
+                (WAVE_FORMAT_PCM, 16) => BinaryPrimitives.ReadInt16LittleEndian(sample) / 32768f,
+                (WAVE_FORMAT_PCM, 24) => ((sample[0] << 8 | sample[1] << 16 | sample[2] << 24) >> 8) / 8388608f,
+                (WAVE_FORMAT_PCM, _) => BinaryPrimitives.ReadInt32LittleEndian(sample) / 2147483648f,
                 (_, 32) => BinaryPrimitives.ReadSingleLittleEndian(sample),
                 _ => (float)BinaryPrimitives.ReadDoubleLittleEndian(sample),
             };
         }
         return samples;
+    }
+
+    private static ushort EncodingOf(in Guid subFormat)
+    {
+        if (subFormat == IID_KSDATAFORMAT_SUBTYPE_PCM) return WAVE_FORMAT_PCM;
+        if (subFormat == IID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT) return WAVE_FORMAT_IEEE_FLOAT;
+        return WAVE_FORMAT_EXTENSIBLE;
     }
 
     private static uint ReadUInt32(ReadOnlySpan<byte> bytes) => BinaryPrimitives.ReadUInt32LittleEndian(bytes);

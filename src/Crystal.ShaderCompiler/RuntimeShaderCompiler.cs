@@ -1,4 +1,5 @@
 using System.Text;
+using Crystal.Graphics.D3D12;
 
 namespace Crystal.ShaderCompiler;
 
@@ -59,8 +60,8 @@ public sealed class RuntimeShaderCompiler : IDisposable
         {
             List<string> problems = [.. compiled.Reflection.Problems];
             var constantBufferRegisterLimit = stage == ShaderStage.Compute
-                ? ShaderLibraryBuilder.ComputeConstantBufferRegisterLimit
-                : ShaderLibraryBuilder.GraphicsConstantBufferRegisterLimit;
+                ? D3D12BindingLimits.ComputeConstantBufferRegisters
+                : D3D12BindingLimits.GraphicsConstantBufferRegisters;
             foreach (var buffer in compiled.Reflection.ConstantBuffers)
                 if (buffer.Space != 0 || buffer.Register >= constantBufferRegisterLimit)
                     problems.Add($"Constant buffer {buffer.Name} is at b{buffer.Register}, space{buffer.Space}; constant buffers must be in space0 below b{constantBufferRegisterLimit}.");

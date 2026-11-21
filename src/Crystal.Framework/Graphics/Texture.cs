@@ -1,17 +1,18 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_LAYOUT;
-using static TerraFX.Interop.DirectX.D3D12_DSV_DIMENSION;
-using static TerraFX.Interop.DirectX.D3D12_DSV_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_HEAP_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_RESOURCE_DIMENSION;
-using static TerraFX.Interop.DirectX.D3D12_RESOURCE_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_RTV_DIMENSION;
-using static TerraFX.Interop.DirectX.D3D12_SRV_DIMENSION;
-using static TerraFX.Interop.DirectX.D3D12_TEXTURE_LAYOUT;
-using static TerraFX.Interop.DirectX.D3D12_UAV_DIMENSION;
+using Crystal.Interop;
+using static Crystal.Interop.D3D12_BARRIER_LAYOUT;
+using static Crystal.Interop.D3D12_DSV_DIMENSION;
+using static Crystal.Interop.D3D12_DSV_FLAGS;
+using static Crystal.Interop.D3D12_HEAP_TYPE;
+using static Crystal.Interop.D3D12_RESOURCE_DIMENSION;
+using static Crystal.Interop.D3D12_RESOURCE_FLAGS;
+using static Crystal.Interop.D3D12_RTV_DIMENSION;
+using static Crystal.Interop.D3D12_SRV_DIMENSION;
+using static Crystal.Interop.D3D12_TEXTURE_LAYOUT;
+using static Crystal.Interop.D3D12_UAV_DIMENSION;
+using static Crystal.Interop.D3D12;
 
 namespace Crystal.Graphics;
 
@@ -57,7 +58,7 @@ public abstract unsafe class Texture : GraphicsResource
             DepthOrArraySize = (ushort)arrayLayers,
             MipLevels = (ushort)mipLevels,
             Format = FormatInfo.ResourceFormat,
-            SampleDesc = new DXGI_SAMPLE_DESC((uint)description.SampleCount, 0),
+            SampleDesc = new DXGI_SAMPLE_DESC { Count = (uint)description.SampleCount, Quality = 0 },
             Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
             Flags = flags,
         };
@@ -84,7 +85,7 @@ public abstract unsafe class Texture : GraphicsResource
         if ((usage & TextureUsage.ShaderResource) != 0)
         {
             ShaderResourceViewIndex = device.ShaderResourceHeap.Allocate();
-            var view = new D3D12_SHADER_RESOURCE_VIEW_DESC { Format = FormatInfo.ViewFormat, Shader4ComponentMapping = D3D12Formats.DefaultComponentMapping };
+            var view = new D3D12_SHADER_RESOURCE_VIEW_DESC { Format = FormatInfo.ViewFormat, Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING };
             if (isCube && arrayLayers > 6)
             {
                 view.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
@@ -242,7 +243,7 @@ public abstract unsafe class Texture : GraphicsResource
         if ((Usage & TextureUsage.ShaderResource) != 0)
         {
             shaderResourceViewIndex = device.ShaderResourceHeap.Allocate();
-            var view = new D3D12_SHADER_RESOURCE_VIEW_DESC { Format = FormatInfo.ViewFormat, Shader4ComponentMapping = D3D12Formats.DefaultComponentMapping };
+            var view = new D3D12_SHADER_RESOURCE_VIEW_DESC { Format = FormatInfo.ViewFormat, Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING };
             if (_isCube && ArrayLayers > 6)
             {
                 view.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;

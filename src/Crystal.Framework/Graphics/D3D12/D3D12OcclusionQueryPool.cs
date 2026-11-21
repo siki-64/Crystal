@@ -1,8 +1,8 @@
-using TerraFX.Interop.DirectX;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12Interop;
-using static TerraFX.Interop.DirectX.D3D12_HEAP_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_QUERY_HEAP_TYPE;
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.D3D12_HEAP_TYPE;
+using static Crystal.Interop.D3D12_QUERY_HEAP_TYPE;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics.D3D12;
 

@@ -1,15 +1,17 @@
+using static Crystal.Interop.D3D12_STENCIL_OP;
+
 namespace Crystal.Graphics;
 
 public enum StencilOperation
 {
-    Keep = 1,
-    Zero,
-    Replace,
-    IncrementSaturate,
-    DecrementSaturate,
-    Invert,
-    Increment,
-    Decrement,
+    Keep = (int)D3D12_STENCIL_OP_KEEP,
+    Zero = (int)D3D12_STENCIL_OP_ZERO,
+    Replace = (int)D3D12_STENCIL_OP_REPLACE,
+    IncrementSaturate = (int)D3D12_STENCIL_OP_INCR_SAT,
+    DecrementSaturate = (int)D3D12_STENCIL_OP_DECR_SAT,
+    Invert = (int)D3D12_STENCIL_OP_INVERT,
+    Increment = (int)D3D12_STENCIL_OP_INCR,
+    Decrement = (int)D3D12_STENCIL_OP_DECR,
 }
 
 public readonly record struct StencilFaceDescription

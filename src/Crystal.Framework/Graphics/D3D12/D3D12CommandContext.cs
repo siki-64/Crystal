@@ -1,9 +1,10 @@
 using System.Runtime.InteropServices;
-using TerraFX.Interop.DirectX;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_ACCESS;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_LAYOUT;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_SYNC;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_TYPE;
+using Crystal.Interop;
+using static Crystal.Interop.D3D12_BARRIER_ACCESS;
+using static Crystal.Interop.D3D12_BARRIER_LAYOUT;
+using static Crystal.Interop.D3D12_BARRIER_SYNC;
+using static Crystal.Interop.D3D12_BARRIER_TYPE;
+using static Crystal.Interop.D3D12;
 
 namespace Crystal.Graphics.D3D12;
 
@@ -13,7 +14,6 @@ internal sealed unsafe class D3D12CommandContext : IDisposable
         D3D12_BARRIER_ACCESS_RENDER_TARGET | D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE | D3D12_BARRIER_ACCESS_COPY_DEST
         | D3D12_BARRIER_ACCESS_RESOLVE_DEST | D3D12_BARRIER_ACCESS_UNORDERED_ACCESS;
 
-    private const int MaximumRootParameters = 64;
 
     private static ulong s_lastCommandListNumber;
 
@@ -46,8 +46,8 @@ internal sealed unsafe class D3D12CommandContext : IDisposable
     public ID3D12PipelineState* AppliedPipelineState { get; set; }
     public ID3D12RootSignature* AppliedGraphicsRootSignature { get; set; }
     public ID3D12RootSignature* AppliedComputeRootSignature { get; set; }
-    public ulong[] AppliedGraphicsRootArguments { get; } = new ulong[MaximumRootParameters];
-    public ulong[] AppliedComputeRootArguments { get; } = new ulong[MaximumRootParameters];
+    public ulong[] AppliedGraphicsRootArguments { get; } = new ulong[D3D12_MAX_ROOT_COST];
+    public ulong[] AppliedComputeRootArguments { get; } = new ulong[D3D12_MAX_ROOT_COST];
 
     public ID3D12GraphicsCommandList7* Open()
     {
@@ -177,7 +177,7 @@ internal sealed unsafe class D3D12CommandContext : IDisposable
                 LayoutBefore = layoutBefore,
                 LayoutAfter = layout,
                 pResource = resource.Pointer,
-                Subresources = new D3D12_BARRIER_SUBRESOURCE_RANGE { IndexOrFirstMipLevel = uint.MaxValue },
+                Subresources = new D3D12_BARRIER_SUBRESOURCE_RANGE { IndexOrFirstMipLevel = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES },
             };
             var group = new D3D12_BARRIER_GROUP { Type = D3D12_BARRIER_TYPE_TEXTURE, NumBarriers = 1 };
             group.pTextureBarriers = &barrier;

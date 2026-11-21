@@ -158,7 +158,7 @@ A `cbuffer` at register `b{Register}` in `space{Space}`, `Size` bytes (at most 6
 A value at a byte offset in its buffer. `Rows` and `Columns` are 1 for scalars, 1 and N for vectors. `Elements` is the array length, 0 when not an array. The variable must lie inside the buffer.
 
 ### ShaderVariableClass
-`public enum ShaderVariableClass { Scalar = 0, Vector = 1, MatrixRows = 2, MatrixColumns = 3, Struct = 4 }`
+`public enum ShaderVariableClass { Scalar = 0, Vector = 1, MatrixRows = 2, MatrixColumns = 3, Struct = 5 }`
 
 `MatrixRows` is row-major storage, `MatrixColumns` column-major.
 

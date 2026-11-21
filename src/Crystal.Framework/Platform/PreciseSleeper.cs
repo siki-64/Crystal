@@ -1,16 +1,14 @@
 using System.Diagnostics;
-using TerraFX.Interop.Windows;
-using static TerraFX.Interop.Windows.Windows;
+using Crystal.Interop;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Platform;
 
 internal sealed unsafe class PreciseSleeper : IDisposable
 {
-    private const uint CreateWaitableTimerHighResolution = 0x00000002;
-
     private static readonly TimeSpan SpinThreshold = TimeSpan.FromMilliseconds(1);
 
-    private HANDLE _timer = CreateWaitableTimerExW(null, null, CreateWaitableTimerHighResolution, TIMER_ALL_ACCESS);
+    private void* _timer = CreateWaitableTimerExW(null, null, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
 
     public void Sleep(TimeSpan duration) =>
         SleepUntil(Stopwatch.GetTimestamp() + (long)(duration.TotalSeconds * Stopwatch.Frequency));
@@ -20,10 +18,10 @@ internal sealed unsafe class PreciseSleeper : IDisposable
         var coarse = Stopwatch.GetElapsedTime(Stopwatch.GetTimestamp(), deadline) - SpinThreshold;
         if (coarse > TimeSpan.Zero)
         {
-            if (_timer != HANDLE.NULL)
+            if (_timer != null)
             {
                 var dueTime = new LARGE_INTEGER { QuadPart = -coarse.Ticks };
-                if (SetWaitableTimerEx(_timer, &dueTime, 0, null, null, null, 0)) WaitForSingleObject(_timer, INFINITE);
+                if (SetWaitableTimerEx(_timer, &dueTime, 0, null, null, null, 0) != FALSE) WaitForSingleObject(_timer, INFINITE);
             }
             else
             {
@@ -36,8 +34,8 @@ internal sealed unsafe class PreciseSleeper : IDisposable
 
     public void Dispose()
     {
-        if (_timer == HANDLE.NULL) return;
+        if (_timer == null) return;
         CloseHandle(_timer);
-        _timer = HANDLE.NULL;
+        _timer = null;
     }
 }

@@ -1,6 +1,6 @@
 using Crystal.Graphics;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
+using Crystal.Interop;
 
 namespace Crystal.Tests;
 

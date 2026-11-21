@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12Interop;
 
 namespace Crystal.Graphics;

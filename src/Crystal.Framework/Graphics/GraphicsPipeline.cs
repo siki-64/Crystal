@@ -1,23 +1,23 @@
 using System.Runtime.InteropServices;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12Interop;
-using static TerraFX.Interop.DirectX.D3D_PRIMITIVE_TOPOLOGY;
-using static TerraFX.Interop.DirectX.D3D12_INPUT_CLASSIFICATION;
-using static TerraFX.Interop.DirectX.D3D12_PRIMITIVE_TOPOLOGY_TYPE;
-using static TerraFX.Interop.DirectX.DXGI_FORMAT;
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.D3D_PRIMITIVE_TOPOLOGY;
+using static Crystal.Interop.D3D12_INPUT_CLASSIFICATION;
+using static Crystal.Interop.D3D12_PRIMITIVE_TOPOLOGY_TYPE;
+using static Crystal.Interop.DXGI_FORMAT;
+using static Crystal.Interop.D3D12;
+using static Crystal.Interop.Windows;
 
 namespace Crystal.Graphics;
 
 public enum PrimitiveType
 {
-    TriangleList,
-    TriangleStrip,
-    LineList,
-    LineStrip,
-    PointList,
+    TriangleList = (int)D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+    TriangleStrip = (int)D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+    LineList = (int)D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+    LineStrip = (int)D3D_PRIMITIVE_TOPOLOGY_LINESTRIP,
+    PointList = (int)D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
 }
 
 public sealed record GraphicsPipelineDescription
@@ -52,14 +52,7 @@ public sealed unsafe class GraphicsPipeline : GraphicsResource
 
         Program = description.Program;
         RequiredVertexSlots = description.VertexLayout?.SlotMask ?? 0;
-        Topology = description.PrimitiveType switch
-        {
-            PrimitiveType.TriangleStrip => D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-            PrimitiveType.LineList => D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-            PrimitiveType.LineStrip => D3D_PRIMITIVE_TOPOLOGY_LINESTRIP,
-            PrimitiveType.PointList => D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-            _ => D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-        };
+        Topology = (D3D_PRIMITIVE_TOPOLOGY)description.PrimitiveType;
         _pipelineState = Create(graphicsDevice.Native, description, _renderTargetFormats, Name ?? $"{Program.Library.Name}.{Program.Name}");
         graphicsDevice.Track(this);
     }
@@ -167,7 +160,7 @@ public sealed unsafe class GraphicsPipeline : GraphicsResource
                     VS = new D3D12_SHADER_BYTECODE { pShaderBytecode = vertexShader, BytecodeLength = (nuint)program.VertexShader!.Length },
                     PS = pixelShader == null ? default : new D3D12_SHADER_BYTECODE { pShaderBytecode = pixelShader, BytecodeLength = (nuint)program.PixelShader!.Length },
                     BlendState = D3D12States.ToD3D12(description.BlendState),
-                    SampleMask = uint.MaxValue,
+                    SampleMask = D3D12_DEFAULT_SAMPLE_MASK,
                     RasterizerState = D3D12States.ToD3D12(description.RasterizerState),
                     DepthStencilState = depthStencil,
                     InputLayout = new D3D12_INPUT_LAYOUT_DESC { pInputElementDescs = inputElementPointer, NumElements = (uint)inputElements.Length },
@@ -186,7 +179,7 @@ public sealed unsafe class GraphicsPipeline : GraphicsResource
                 ID3D12PipelineState* pipelineState;
                 var result = device.Device->CreateGraphicsPipelineState(&pipeline, __uuidof<ID3D12PipelineState>(), (void**)&pipelineState);
                 if (FAILED(result))
-                    throw new GraphicsException($"Creating pipeline '{name}' failed (HRESULT 0x{result.Value:X8}). Enable the debug layer with CRYSTAL_DX12_DEBUG=1 for details.");
+                    throw new GraphicsException($"Creating pipeline '{name}' failed (HRESULT 0x{result:X8}). Enable the debug layer with CRYSTAL_DX12_DEBUG=1 for details.");
                 SetName((ID3D12Object*)pipelineState, name);
                 return pipelineState;
             }

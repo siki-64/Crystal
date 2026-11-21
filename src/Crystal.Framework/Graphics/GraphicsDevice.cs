@@ -1,27 +1,26 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
-using TerraFX.Interop.Windows;
+using Crystal.Interop;
 using static Crystal.Graphics.D3D12.D3D12Interop;
-using static TerraFX.Interop.DirectX.D3D_PRIMITIVE_TOPOLOGY;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_ACCESS;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_LAYOUT;
-using static TerraFX.Interop.DirectX.D3D12_BARRIER_SYNC;
-using static TerraFX.Interop.DirectX.D3D12_CLEAR_FLAGS;
-using static TerraFX.Interop.DirectX.D3D12_COMMAND_LIST_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_HEAP_TYPE;
-using static TerraFX.Interop.DirectX.D3D12_RESOURCE_DIMENSION;
-using static TerraFX.Interop.DirectX.D3D12_TEXTURE_LAYOUT;
-using static TerraFX.Interop.Windows.Windows;
+using static Crystal.Interop.D3D_PRIMITIVE_TOPOLOGY;
+using static Crystal.Interop.D3D12_BARRIER_ACCESS;
+using static Crystal.Interop.D3D12_BARRIER_LAYOUT;
+using static Crystal.Interop.D3D12_BARRIER_SYNC;
+using static Crystal.Interop.D3D12_CLEAR_FLAGS;
+using static Crystal.Interop.D3D12_COMMAND_LIST_TYPE;
+using static Crystal.Interop.D3D12_HEAP_TYPE;
+using static Crystal.Interop.D3D12_RESOURCE_DIMENSION;
+using static Crystal.Interop.D3D12_TEXTURE_LAYOUT;
+using static Crystal.Interop.Windows;
+using static Crystal.Interop.D3D12;
 
 namespace Crystal.Graphics;
 
 public sealed unsafe partial class GraphicsDevice : IDisposable
 {
-    public const int MaximumRenderTargets = 8;
+    public const int MaximumRenderTargets = (int)D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
-    private const int ConstantBufferAlignment = 256;
     private const int TransientDataAlignment = 16;
 
     private readonly D3D12Device _device;
@@ -114,7 +113,7 @@ public sealed unsafe partial class GraphicsDevice : IDisposable
             DepthOrArraySize = 1,
             MipLevels = 1,
             Format = D3D12SwapChain.Format,
-            SampleDesc = new DXGI_SAMPLE_DESC(1, 0),
+            SampleDesc = new DXGI_SAMPLE_DESC { Count = 1, Quality = 0 },
             Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
         };
         return BeginTextureReadback(_swapChain.CurrentBuffer, description, 0);
@@ -461,7 +460,7 @@ public sealed unsafe partial class GraphicsDevice : IDisposable
 
         if (BoundRecording is { } bound)
         {
-            var recordedMapped = bound.UploadRing.Allocate((int)totalSize, (int)TerraFX.Interop.DirectX.D3D12.D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT, out _, out var recordedRingResource, out var recordedRingOffset);
+            var recordedMapped = bound.UploadRing.Allocate((int)totalSize, (int)Crystal.Interop.D3D12.D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT, out _, out var recordedRingResource, out var recordedRingOffset);
             CopyRows(data, recordedMapped + footprint.Offset, rowCount, rowSize, footprint.Footprint.RowPitch);
             footprint.Offset += recordedRingOffset;
             CopyToTexture(BeginRecordedUpload(bound, destination), destination, subresource, recordedRingResource, footprint, x, y);
@@ -470,7 +469,7 @@ public sealed unsafe partial class GraphicsDevice : IDisposable
 
         if (CanUploadThroughRing(destination))
         {
-            var mapped = _uploadRing.Allocate((int)totalSize, (int)TerraFX.Interop.DirectX.D3D12.D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT, out _, out var ringResource, out var ringOffset);
+            var mapped = _uploadRing.Allocate((int)totalSize, (int)Crystal.Interop.D3D12.D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT, out _, out var ringResource, out var ringOffset);
             CopyRows(data, mapped + footprint.Offset, rowCount, rowSize, footprint.Footprint.RowPitch);
             footprint.Offset += ringOffset;
             var directList = BeginUpload(destination, out _);
@@ -479,7 +478,7 @@ public sealed unsafe partial class GraphicsDevice : IDisposable
         }
 
         var list = BeginUpload(destination, out var copyList);
-        if (copyList != null && _copyStagingPool.TryAllocate(totalSize, TerraFX.Interop.DirectX.D3D12.D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT, out var pooled))
+        if (copyList != null && _copyStagingPool.TryAllocate(totalSize, Crystal.Interop.D3D12.D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT, out var pooled))
         {
             CopyRows(data, pooled.CpuAddress + footprint.Offset, rowCount, rowSize, footprint.Footprint.RowPitch);
             footprint.Offset += pooled.Offset;
@@ -832,7 +831,7 @@ public sealed unsafe partial class GraphicsDevice : IDisposable
                 if (constantBuffer.IsDirty || constantBuffer.UploadedFrame != _frameNumber)
                 {
                     var data = constantBuffer.Data;
-                    var destination = state.UploadRing.Allocate(data.Length, ConstantBufferAlignment, out var uploadedAddress);
+                    var destination = state.UploadRing.Allocate(data.Length, (int)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT, out var uploadedAddress);
                     data.AsSpan().CopyTo(new Span<byte>(destination, data.Length));
                     constantBuffer.UploadedAddress = uploadedAddress;
                     constantBuffer.UploadedFrame = _frameNumber;
@@ -859,8 +858,8 @@ public sealed unsafe partial class GraphicsDevice : IDisposable
         var resources = program.Info.Resources;
         var resourceValues = program.ValuesFor(state).Resources;
         var usesDescriptorIndices = program.UsesDescriptorIndices;
-        var firstStageSlots = stackalloc uint[D3D12RootSignatures.ComputeDescriptorSlots];
-        var pixelSlots = stackalloc uint[D3D12RootSignatures.PixelDescriptorSlots];
+        var firstStageSlots = stackalloc uint[D3D12BindingLimits.ComputeDescriptorSlots];
+        var pixelSlots = stackalloc uint[D3D12BindingLimits.PixelDescriptorSlots];
         var rootParameter = (uint)program.ConstantBufferSlots.Length;
         for (var index = 0; index < resources.Length; index++, rootParameter++)
         {

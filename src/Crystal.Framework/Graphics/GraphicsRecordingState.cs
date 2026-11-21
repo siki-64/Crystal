@@ -1,6 +1,6 @@
 using System.Numerics;
 using Crystal.Graphics.D3D12;
-using TerraFX.Interop.DirectX;
+using Crystal.Interop;
 
 namespace Crystal.Graphics;
 
